@@ -1,0 +1,163 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  font-family: theme("fontFamily.sans");
+  font-size: 17px;
+  line-height: 1.45;
+  color: theme("colors.ink");
+  background: theme("colors.page");
+  -webkit-font-smoothing: antialiased;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply flex w-full items-center justify-center rounded-2xl bg-brand px-4 py-3.5 text-[17px] font-semibold text-white shadow-soft transition duration-200 ease-out active:scale-[0.98] hover:brightness-105;
+  }
+
+  .btn-gradient {
+    @apply flex w-full items-center justify-center rounded-2xl bg-brand-gradient px-4 py-3.5 text-[17px] font-semibold text-white shadow-soft transition duration-200 ease-out active:scale-[0.98] hover:brightness-105;
+  }
+
+  .btn-soft {
+    @apply flex w-full items-center justify-center rounded-2xl bg-brand-light px-4 py-3.5 text-[17px] font-semibold text-brand transition duration-200 ease-out active:scale-[0.98] hover:bg-brand-soft;
+  }
+
+  .btn-secondary {
+    @apply flex w-full items-center justify-center rounded-2xl border-2 border-brand bg-white px-4 py-3.5 text-[17px] font-semibold text-brand transition duration-200 ease-out active:scale-[0.98] hover:bg-brand-light/40;
+  }
+
+  .btn-outline {
+    @apply inline-flex items-center justify-center rounded-2xl border-2 border-brand/30 bg-white px-4 py-2.5 text-[15px] font-semibold text-brand transition duration-200 ease-out active:scale-[0.98] hover:border-brand hover:bg-brand-light/30;
+  }
+
+  .info-card {
+    @apply overflow-hidden rounded-2xl bg-surface ring-1 ring-black/[0.04];
+  }
+
+  .info-row {
+    @apply flex items-start gap-3 border-b border-line px-4 py-3.5 last:border-b-0;
+  }
+
+  .page-title {
+    @apply text-[22px] font-bold leading-tight tracking-tight text-ink;
+  }
+
+  .input-field {
+    @apply mt-1.5 w-full rounded-xl border border-line bg-surface px-4 py-3 text-[17px] text-ink outline-none transition placeholder:text-muted focus:border-brand/50 focus:ring-2 focus:ring-brand/15;
+  }
+
+  .filter-chip {
+    @apply shrink-0 rounded-full bg-page px-3.5 py-2 text-[14px] font-semibold text-muted ring-1 ring-black/[0.05];
+  }
+
+  .filter-chip-active-blue {
+    @apply bg-brand text-white shadow-soft ring-1 ring-brand;
+  }
+
+  .filter-chip-active-green {
+    @apply bg-taiga text-white shadow-green ring-1 ring-taiga;
+  }
+
+  .badge-person {
+    @apply bg-brand-light text-brand-dark;
+  }
+
+  .badge-partner {
+    @apply bg-taiga-light text-taiga-dark;
+  }
+
+  .badge-category {
+    @apply bg-page text-ink;
+  }
+
+  .task-tile {
+    @apply overflow-hidden rounded-2xl bg-surface shadow-card ring-1 ring-black/[0.04] transition duration-300 ease-out hover:shadow-soft hover:ring-brand/10;
+  }
+
+  .shimmer-block {
+    @apply animate-shimmer bg-page;
+    background-image: linear-gradient(90deg, #f2f7f5 0%, #fff 40%, #e3f6fd 50%, #fff 60%, #f2f7f5 100%);
+    background-size: 200% 100%;
+  }
+
+  .animate-page-in {
+    @apply animate-fade-in;
+  }
+
+  .stagger-1 {
+    animation-delay: 50ms;
+  }
+  .stagger-2 {
+    animation-delay: 100ms;
+  }
+  .stagger-3 {
+    animation-delay: 150ms;
+  }
+  .stagger-4 {
+    animation-delay: 200ms;
+  }
+  .stagger-5 {
+    animation-delay: 250ms;
+  }
+  .stagger-6 {
+    animation-delay: 300ms;
+  }
+
+  .segment-track {
+    @apply relative grid grid-cols-3 gap-1 rounded-2xl bg-page/80 p-1 ring-1 ring-black/[0.04];
+  }
+
+  .segment-btn {
+    @apply relative z-10 rounded-xl px-2 py-2.5 text-center text-[13px] font-semibold text-muted transition-colors duration-200;
+  }
+
+  .segment-btn-active {
+    @apply text-ink;
+  }
+
+  .ambient-blob {
+    @apply pointer-events-none fixed rounded-full blur-3xl opacity-60;
+  }
+
+  .snap-scroll-x {
+    @apply flex gap-3 overflow-x-auto pb-1;
+    scrollbar-width: none;
+    scroll-snap-type: x mandatory;
+  }
+
+  .snap-scroll-x::-webkit-scrollbar {
+    display: none;
+  }
+
+  .snap-scroll-x > * {
+    scroll-snap-align: start;
+  }
+
+  .filter-trigger {
+    @apply flex w-[6.75rem] shrink-0 flex-col items-start rounded-xl border border-line bg-surface px-2.5 py-2 text-left transition active:bg-page;
+  }
+
+  .filter-trigger-label {
+    @apply w-full truncate text-[12px] leading-tight text-muted;
+  }
+
+  .filter-trigger-value {
+    @apply mt-1 flex w-full min-w-0 items-center justify-between gap-1 text-[14px] font-semibold leading-tight text-ink;
+  }
+
+  .filter-trigger-value-text {
+    @apply min-w-0 truncate;
+  }
+
+  .filter-trigger-active {
+    @apply border-brand/30 bg-brand-light/40;
+  }
+}

@@ -1,0 +1,402 @@
+================================================================================
+SMENAYKT — PROJECT CONTEXT & CONVERSATION LOG
+================================================================================
+Purpose: Single reference file for AI and humans. Re-read this to recall all
+product, legal, design, and strategy decisions discussed from project start.
+
+Last updated: 2026-05-30 (architecture v2: app + partner web)
+Repo: smenaykt (c:\smenaykt)
+Communication: English in chat; app UI in Russian (v1).
+
+================================================================================
+1. PROJECT ORIGIN & TEAM
+================================================================================
+
+- Empty repo, building a new product from scratch ("vibe coding").
+- Founder was born in Yakutia; currently lives in Moscow.
+- Partner has strong local connections: ~20–30 small/medium businesses (stores,
+  etc.) in Yakutia and access to hundreds of students who want one-day jobs
+  and quick money.
+- Competitive angle: more Yakutsk ground experience than Yandex; local trust
+  beats Moscow brand for this market.
+- Founder is a native Sakha (Yakut) speaker — Sakha translation can be done
+  in-house later without machine translation.
+
+Visit to Yakutsk (2025) was motivating: market is NOT like Moscow.
+- Rides: Drivee (inDrive lineage), not Yandex Go dominance.
+- Jobs/help: WhatsApp groups still work fine for informal labor.
+- DoskaYkt is the familiar local classifieds pattern (list, call, chat, map).
+
+================================================================================
+2. PRODUCT VISION (ARCHITECTURE v2 — CURRENT)
+================================================================================
+
+Name (working): SmenaYKT
+Tagline: "Из Якутии — для якутян"
+City focus: Yakutsk first, then possibly wider RS(Y).
+
+TWO SURFACES, NOT THREE APPS IN ONE:
+
+  A) MOBILE APP — one TaskRabbit-style product for everyone local
+     - Babushka / neighbor POSTS help (ice, dacha, errands).
+     - Student BROWSES and ACCEPTS tasks.
+     - Same app, same login — post OR work (like TaskRabbit client + tasker).
+     - ONE unified task feed; store shifts appear here too with a tag/badge.
+     - No separate "consumer app" vs "worker app" — merged.
+     - Closest ref: TaskRabbit (+ Kickback for map/post flow).
+
+  B) PARTNER WEB — separate site, invite-only (NOT in the app store flow)
+     - URL idea: partner.smenaykt.ru or business.smenaykt.ykt (TBD)
+     - Only for ~20–30 businesses the partner onboarded manually.
+     - Login: invite link / partner code — no public store signup.
+     - Instawork-style: post shift, see who accepted, confirm done, LMK toggle.
+     - Desktop/tablet OK — store managers use browser at work.
+     - Shifts posted here → appear in mobile app feed for students.
+     - Closest ref: Instawork for Business (web).
+
+Why this fits Yakutsk:
+- Region is small; partner knows every store personally — no need for public
+  self-serve store onboarding in app.
+- Simpler mobile app = faster build, easier for babushka AND students.
+- Stores don't want another app — a bookmarked web panel is enough.
+- Students still see all work (home + store) in one place.
+
+Task types in unified mobile feed (filter chips, not separate modes):
+  - from_person — home help, ice, dacha (4% NPD, usually no LMK)
+  - from_partner — store shift (6% NPD, LMK flag from partner web)
+
+NOT competing with Drivee (rides).
+
+Pitch (local):
+  "WhatsApp for jobs, but you can find people again."
+  "Post help or pick up work — one app for Yakutsk."
+
+================================================================================
+2b. OLDER IDEA (superseded) — two lanes + employer in app
+================================================================================
+Previously discussed: two modes in app + employer section in app.
+Replaced by: unified TaskRabbit app + partner-only website (above).
+
+================================================================================
+2c. PRODUCT VISION — TASK / LEGAL DETAILS (still valid)
+================================================================================
+
+  HOME / PERSON tasks (posted in app by individuals):
+    - Ice, dacha, snow, moving, errands.
+    - No LMK typically. NPD 4% to person.
+
+  PARTNER / STORE tasks (posted on partner web):
+    - Shelf stocking, cashier, warehouse.
+    - LMK may required. NPD 6% to legal entity.
+    - Partner's 20–30 businesses = launch wedge for supply of shifts.
+
+================================================================================
+3. YAKUTIA / MARKET CONTEXT
+================================================================================
+
+Yakutia (Sakha Republic):
+- ~1M population, hub = Yakutsk; remote, cold, resource economy.
+- IT is regional scale; tight community; word of mouth matters.
+- Brain drain to Moscow/SPb; limited VC; B2G/B2B often fit better than B2C.
+- Enforcement of regulations (RPN, labor) is WEAKER than Moscow — especially
+  in isolated Yakutsk — but store partners and incidents can still trigger
+  checks. Product must be honest; don't rely on "nobody checks."
+
+Local apps users already know:
+- Drivee — taxi, P2P price negotiation, Yakut-origin (inDrive founded 2012
+  Yakutsk, VK group "Независимые водители").
+- DoskaYkt — since 2002, doska.ykt.ru, list + call + map + chat.
+- WhatsApp/Telegram — informal jobs, zero friction, trust via network.
+
+================================================================================
+4. YANDEX SMENA (REFERENCE COMPETITOR)
+================================================================================
+
+What it is:
+- Gig marketplace by OOO "Смена" (Yandex-affiliated).
+- "Shift" = civil-law task request, NOT employment shift (their legal wording).
+- 70+ regions, retail/restaurant/warehouse tasks, 4–12 hour blocks.
+- Workers mostly self-employed (NPD / 422-FZ); optional Park-agent intermediary.
+
+Legal model (NOT Labor Code / TK RF):
+- Platform = information service + tech.
+- Each accepted task = GPH service contract (offer + specific "Zayavka").
+- Store = customer; worker = self-employed executor; Yandex not employer.
+- No paid leave, sick pay, pension from client; worker pays 6% NPD.
+
+Labor Code still matters via REQUALIFICATION (perekvallifikatsiya):
+- If relationship looks like employment (fixed schedule, same workplace daily,
+  subordination, salary-like payments), FNS/labor can reclassify as labor
+  contract — risk mainly on STORE, not platform, if platform is honest.
+- 2-year ban: self-employed cannot serve former employer (422-FZ).
+- Platform terms explicitly disclaim employment; worker chooses tasks freely.
+
+Docs: yandex.ru/legal/smena_offer, smena_termsofuse, smena.yandex.ru
+
+================================================================================
+5. LEGAL STRATEGY (RUSSIA) — AGREED APPROACH
+================================================================================
+
+Disclaimer: Not legal advice. Get lawyer review before real users.
+
+Entity:
+- Register IP (individual entrepreneur) before first real store/user — cheap
+  (~0–800 RUB), USN 6%, tax on 0 revenue = 0.
+- OOO later if big B2B clients require it.
+
+Platform role:
+- Matcher / information intermediary, NOT employer, NOT payment agent (v1).
+
+Payments v1:
+- NO platform commission initially.
+- Store/person pays worker DIRECTLY (cash or bank transfer).
+- Avoids payment aggregator until volume justifies YooKassa etc.
+- Cannot skip IP + PD just because revenue = 0 — once real users, register IP.
+
+Worker:
+- 18+, self-employed (My Tax / NPD), receipt per shift (4% individual, 6% biz).
+- Each accept = one task contract, not ongoing employment.
+
+Documents needed before real launch:
+  [ ] IP registered
+  [ ] Worker public offer (platform not employer, per-task GPH)
+  [ ] Store B2B agreement (accurate tasks, on-site compliance, LMK checks)
+  [ ] Consumer terms (Lane 1 — lighter)
+  [ ] Privacy policy + consent (152-FZ — passports, phones, geo)
+  [ ] App flow: post → accept → confirm (not just profiles database)
+
+LMK / med book liability (AGREED):
+- Put in Terms + B2B: store and worker responsible for LMK verification;
+  platform publishes what store declared, does not replace RPN.
+- NOT in privacy policy alone — wrong document.
+- Do NOT mask food/floor jobs as "office" to skip LMK — fraud, ops failure.
+
+Partner tiers (Yakutsk pragmatism):
+  Tier 1 — Chains/formal: LMK required in app, NPD required.
+  Tier 2 — Local SMB: store toggles LMK required / recommended / not checked.
+  Tier 3 — Informal or warehouse/back-room: start here if needed.
+
+Launch phases (legal):
+  Phase 0: Fake test, friends, no real PD — OK briefly.
+  Phase 1: IP + 3 stores + 20 students, 0% commission, direct pay.
+  Phase 2: All partners, commission + in-app payments when proven.
+  Phase 3: FNS auto-receipts via bank partner if volume warrants.
+
+289-FZ platform economy law (Oct 2026): large platform registry thresholds
+(100k+ users etc.) — student Yakutsk MVP won't hit soon; still design worker
+choice and per-task contracts correctly.
+
+Sanctions note:
+- Western UX patterns (Instawork, TaskRabbit) OK to copy — flows not IP.
+- Use Russian stack: YooKassa/Tinkoff, Yandex Maps, RuStore/PWA, Selectel/etc.
+- Nobody will sue Yakutsk student app for shift-card UI; can't use Stripe.
+
+================================================================================
+6. MED BOOK (LMK / МЕДКНИЖКА)
+================================================================================
+
+Sanitary rules follow TYPE OF WORK, not self-employment status.
+
+LMK typically REQUIRED:
+- Restaurants/cafes/kitchen (SanPiN 2.3/2.4.3590-20): cooks, waiters, dishwashers.
+- Food retail: stocking, checkout in grocery.
+- Often shop floor / cashier in retail generally.
+
+Often NOT required (or store may waive in Tier 2):
+- Warehouse/back room only, no sales floor.
+- Moving boxes at back door.
+- Home help: ice, dacha, yard (Lane 1).
+
+422-FZ silent on LMK; stores inspected by Rospotrebnadzor — they won't admit
+workers without LMK to food areas regardless of app label.
+
+App: tag shifts with lmk_required true/false; block accept if store requires
+and worker hasn't uploaded; honest labels only.
+
+DO NOT: label kitchen/food shifts as "office" — students sent home, partners
+lost, legal/reputation damage.
+
+RPN weak in Yakutsk — real risks are: store manager rejection, partner trust,
+incident-triggered checks, corporate compliance at chains.
+
+================================================================================
+7. TRUST — INDRIVE / DRIVEE LESSONS
+================================================================================
+
+inDrive origin (2012 Yakutsk):
+- VK group "Independent Drivers" — 50k members in ~280k city.
+- Phone + haggle + cash; friends as first drivers; solved taxi price pain in -50°C.
+- App scaled P2P price model; transparency before ride (face, rating, plate, GPS).
+
+Apply to SmenaYKT:
+- Local identity ("from Yakut for Yakut").
+- See person before accept (photo, name, rating, uni).
+- Price upfront, fixed per task.
+- Direct payment v1.
+- WhatsApp as distribution (share task links), not enemy.
+- Community first: partner network + students = trust v0.
+- Formal KYC later; don't overbuild Day 1.
+
+Dacha/elderly extra trust:
+- Share task with family member (son in Moscow).
+- Verified student / uni email.
+- Call before visit; optional family approval for remote dacha.
+- "Trusted helper" badge after reviews.
+
+================================================================================
+8. DESIGN & UX PRINCIPLES
+================================================================================
+
+Inspiration blend:
+- Drivee — clean, bright, price visible, local feel.
+- DoskaYkt — card list, CALL button prominent, map.
+- WhatsApp — minimal friction, human first.
+
+Identity:
+- "Из Якутии — для якутян" — obvious from first second.
+- Colors: sky blue #4A9FD4, snow #FAFBFC, taiga green #2D6A4F, warm #E8A838.
+- Simple suorhun-style ornament: thin bars, card corners ONLY — never behind text.
+- Font: Noto Sans / system — must support Sakha letters (ү ө һ ҥ ҕ) for later.
+- No Moscow stock photos; winter/ice/dacha in empty states OK.
+
+Accessibility (lower formal education — design for clarity):
+- Body 17px+, buttons 18px+ bold.
+- Icons + photos > long text.
+- One main action per screen.
+- Plain Russian — no "GPH", "NPD" on screen 1 (explain simply).
+- Call button on every task card.
+- Works old Android, slow 3G; support phone/Telegram not tickets.
+
+Language:
+- v1: Russian only (locales/ru.json).
+- Later: Sakha in locales/sah.json — founder native speaker fills in.
+- i18n-ready: all strings via t("key") in lib/i18n.ts.
+- Toggle РУ | САХ planned in header when Sah ready.
+- Legal docs may stay RU full text + optional Sah summary.
+
+Western UI references to copy (patterns only):
+- Lane 1: TaskRabbit, Kickback (post → applicants → choose → pay).
+- Lane 2: Instawork, Wonolo (shift list → accept → clock in/out → pay).
+
+================================================================================
+9. TECH STACK (CURRENT REPO)
+================================================================================
+
+Framework: Next.js 15 + React 19 + TypeScript + Tailwind CSS
+
+Structure:
+  app/              — pages (/, /home-help, /business)
+  components/       — OrnamentBar, LaneTile, TaskCard
+  lib/i18n.ts       — t() helper, defaultLocale "ru"
+  lib/types.ts      — Task, TaskLane ("home_help" | "business_shift")
+  lib/demo-tasks.ts — sample tasks (ice, snow, store)
+  locales/ru.json   — all UI strings
+  locales/sah.json  — stub for later
+
+Run:
+  npm install
+  npm run dev
+  → http://localhost:3000
+
+Build verified: next build succeeds.
+
+Not yet built:
+  Phone auth, post task forms, real API/DB, payments, ratings, store dashboard,
+  share links for WhatsApp, NPD verification, LMK upload, terms pages.
+
+================================================================================
+10. MVP FEATURE CHECKLIST
+================================================================================
+
+Minimum product (not just data collection):
+  [ ] Post task (home or business) — date, time, place, pay, description
+  [ ] List/map of tasks nearby
+  [ ] Accept task → one task "contract" moment
+  [ ] Confirm done (both sides or store confirms)
+  [ ] Call button (tel: link)
+  [ ] lmk_required flag on business tasks
+  [ ] Share task URL to WhatsApp
+
+Minimum legal before real users:
+  [ ] IP registration
+  [ ] Worker offer + store B2B + consumer terms + PD policy
+  [ ] NPD encouraged/required in terms for paid work
+
+Launch discipline:
+  - Start 3 stores + 20 students, not all 30 at once.
+  - Lane 1 (home help) can launch with fewer doc barriers.
+  - Lane 2 add as partner stores ready.
+
+================================================================================
+11. TASK TAXONOMY (FOR APP CATEGORIES)
+================================================================================
+
+home_help examples:
+  - ice_dacha — bring/stack ice, cellar
+  - snow_yard — clearing
+  - moving — furniture, boxes
+  - errands — generic home help
+  - lmk_required: false (default)
+
+business_shift examples:
+  - food_floor — grocery stocking (LMK required)
+  - food_cashier — (LMK required)
+  - nonfood_floor — retail floor (LMK default true)
+  - warehouse_backroom — (LMK optional, store toggle)
+  - restaurant_kitchen / restaurant_hall — (LMK + hygiene)
+
+================================================================================
+12. WHAT NOT TO DO (HARD NOs)
+================================================================================
+
+- Mask LMK jobs as office/admin tasks.
+- Pretend stores are "consumers" in terms to avoid B2B/labor rules.
+- Skip IP + PD while running real business + student marketplace.
+- Launch to all 30 partners day one.
+- Copy Western code/trademarks; use US payment/legal stack as-is.
+- Dark minimalist SF startup UI with 12-field signup before showing tasks.
+- English in UI.
+- Compete with Drivee on rides.
+
+================================================================================
+13. OPEN NEXT STEPS (WHEN RESUMING WORK)
+================================================================================
+
+Product:
+  1. Instawork-style "post shift" form (business lane)
+  2. TaskRabbit-style "need help" form (home lane)
+  3. Phone login (simple)
+  4. WhatsApp shareable task links
+  5. Store partner toggle for LMK requirement
+
+Legal:
+  1. Draft section outlines for worker offer, store B2B, PD policy
+  2. Register IP before pilot
+  3. One cheap lawyer pass on docs
+
+Growth:
+  1. Map partner's businesses to Tier 1/2/3 + task types
+  2. Pilot ice/dacha via partner WhatsApp groups
+  3. Optional clinic partnership for student LMK group rate
+
+i18n:
+  1. Founder fills locales/sah.json
+  2. Wire sah in lib/i18n.ts + header toggle
+
+================================================================================
+14. KEY EXTERNAL LINKS
+================================================================================
+
+Yandex Smena:     https://smena.yandex.ru
+Smena offer:      https://yandex.ru/legal/smena_offer
+DoskaYkt:         https://doska.ykt.ru
+Sakha dictionary: https://sakhatyla.ru (for future Sah UI)
+
+Western references (UX only):
+  Instawork:       https://www.instawork.com
+  TaskRabbit:      https://www.taskrabbit.com
+  Wonolo:          https://www.wonolo.com
+
+================================================================================
+END OF PROJECT CONTEXT
+================================================================================

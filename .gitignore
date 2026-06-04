@@ -1,0 +1,29 @@
+# dependencies
+node_modules/
+
+# next.js
+.next/
+out/
+
+# env & secrets
+.env
+.env.*
+!.env.example
+
+# prisma / sqlite (recreate with db:push + db:seed)
+**/*.db
+**/*.db-journal
+
+# uploads
+public/uploads/avatars/*
+!public/uploads/avatars/.gitkeep
+
+# debug / os
+npm-debug.log*
+.DS_Store
+Thumbs.db
+*.log
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts

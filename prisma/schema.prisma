@@ -1,0 +1,84 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Store {
+  id         String   @id @default(cuid())
+  name       String
+  inviteCode String   @unique
+  phone      String
+  tasks      Task[]
+  createdAt  DateTime @default(now())
+}
+
+model UserProfile {
+  phone     String   @id
+  name      String   @default("")
+  avatarUrl String?
+  bio       String   @default("")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Task {
+  id            String    @id @default(cuid())
+  source        String    // person | partner
+  storeId       String?
+  store         Store?    @relation(fields: [storeId], references: [id], onDelete: SetNull)
+  title         String
+  description   String    @default("")
+  pay           Int
+  place         String
+  timeLabel     String
+  scheduledAt   DateTime?
+  category      String    @default("personal")
+  durationHours Int       @default(2)
+  emoji         String    @default("📋")
+  lmkRequired   Boolean   @default(false)
+  phone         String
+  status        String    @default("OPEN") // OPEN | ACCEPTED | DONE
+  workerName    String?
+  workerPhone   String?
+  acceptedAt    DateTime?
+  publisherCompletedAt DateTime?
+  workerCompletedAt    DateTime?
+  completedAt   DateTime?
+  createdAt     DateTime  @default(now())
+  reviews       Review[]
+
+  @@index([phone])
+  @@index([workerPhone])
+  @@index([status, createdAt])
+}
+
+model Review {
+  id            String   @id @default(cuid())
+  taskId        String
+  task          Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  reviewerPhone String
+  revieweePhone String
+  rating        Int
+  comment       String   @default("")
+  createdAt     DateTime @default(now())
+
+  @@unique([taskId, reviewerPhone])
+  @@index([revieweePhone, createdAt])
+}
+
+model Notification {
+  id             String    @id @default(cuid())
+  recipientPhone String
+  taskId         String
+  type           String // counterparty_completed | task_closed
+  title          String
+  body           String
+  readAt         DateTime?
+  createdAt      DateTime  @default(now())
+
+  @@index([recipientPhone, readAt, createdAt])
+}
