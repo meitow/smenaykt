@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { toClientTask } from "@/lib/tasks";
+import { assertPhoneNotBanned } from "@/lib/ban-list";
 import { isValidRuPhone, normalizeRuPhone } from "@/lib/phone";
 
 export async function POST(
@@ -20,6 +21,11 @@ export async function POST(
 
     if (!workerPhone || !isValidRuPhone(workerPhone)) {
       return NextResponse.json({ error: "Укажите телефон в профиле" }, { status: 400 });
+    }
+
+    const bannedMessage = await assertPhoneNotBanned(workerPhone);
+    if (bannedMessage) {
+      return NextResponse.json({ error: bannedMessage }, { status: 403 });
     }
 
     const task = await prisma.task.findUnique({ where: { id } });

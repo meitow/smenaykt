@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { ensureUserProfile } from "@/lib/profile";
 import { isTaskPublisher, isTaskWorker, isVerifiedTaskReview } from "@/lib/task-completion";
+import { assertPhoneNotBanned } from "@/lib/ban-list";
 import { isValidRuPhone, normalizeRuPhone } from "@/lib/phone";
 import { prisma } from "@/lib/prisma";
 
@@ -58,6 +59,11 @@ export async function POST(request: NextRequest) {
 
     if (!reviewerPhone || !isValidRuPhone(reviewerPhone)) {
       return NextResponse.json({ error: "Укажите телефон в профиле" }, { status: 400 });
+    }
+
+    const bannedMessage = await assertPhoneNotBanned(reviewerPhone);
+    if (bannedMessage) {
+      return NextResponse.json({ error: bannedMessage }, { status: 403 });
     }
 
     if (!taskId) {

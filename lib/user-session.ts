@@ -1,6 +1,21 @@
+import { normalizeRuPhone } from "@/lib/phone";
+
 const NAME_KEY = "smenaykt_user_name";
 const PHONE_KEY = "smenaykt_user_phone";
 const AVATAR_KEY = "smenaykt_user_avatar";
+const ACCOUNTS_KEY = "smenaykt_saved_accounts";
+const MAX_SAVED_ACCOUNTS = 5;
+
+export type SavedAccount = {
+  phone: string;
+  name: string;
+  avatarUrl?: string;
+};
+
+function dispatchUserUpdated() {
+  if (typeof window === "undefined") return;
+  window.dispatchEvent(new Event("smenaykt_user_updated"));
+}
 
 export function getUserDisplayName(): string {
   if (typeof window === "undefined") return "Гость";
@@ -15,7 +30,7 @@ export function setUserDisplayName(name: string) {
   } else {
     localStorage.removeItem(NAME_KEY);
   }
-  window.dispatchEvent(new Event("smenaykt_user_updated"));
+  dispatchUserUpdated();
 }
 
 export function getUserPhone(): string {
@@ -31,7 +46,7 @@ export function setUserPhone(phone: string) {
   } else {
     localStorage.removeItem(PHONE_KEY);
   }
-  window.dispatchEvent(new Event("smenaykt_user_updated"));
+  dispatchUserUpdated();
 }
 
 export function getUserAvatarUrl(): string {
@@ -47,7 +62,73 @@ export function setUserAvatarUrl(url: string) {
   } else {
     localStorage.removeItem(AVATAR_KEY);
   }
-  window.dispatchEvent(new Event("smenaykt_user_updated"));
+  dispatchUserUpdated();
+}
+
+export function getSavedAccounts(): SavedAccount[] {
+  if (typeof window === "undefined") return [];
+
+  try {
+    const raw = localStorage.getItem(ACCOUNTS_KEY);
+    if (!raw) return [];
+
+    const parsed = JSON.parse(raw) as SavedAccount[];
+    if (!Array.isArray(parsed)) return [];
+
+    const seen = new Set<string>();
+    const accounts: SavedAccount[] = [];
+
+    for (const item of parsed) {
+      const phone = normalizeRuPhone(String(item.phone ?? ""));
+      if (!phone || seen.has(phone)) continue;
+      seen.add(phone);
+      accounts.push({
+        phone,
+        name: String(item.name ?? "").trim() || "Гость",
+        avatarUrl: item.avatarUrl ? String(item.avatarUrl) : undefined,
+      });
+    }
+
+    return accounts.slice(0, MAX_SAVED_ACCOUNTS);
+  } catch {
+    return [];
+  }
+}
+
+export function rememberAccount(account: SavedAccount) {
+  if (typeof window === "undefined") return;
+
+  const phone = normalizeRuPhone(account.phone);
+  if (!phone) return;
+
+  const next: SavedAccount = {
+    phone,
+    name: account.name.trim() || "Гость",
+    avatarUrl: account.avatarUrl?.trim() || undefined,
+  };
+
+  const accounts = getSavedAccounts().filter((item) => item.phone !== phone);
+  accounts.unshift(next);
+  localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(accounts.slice(0, MAX_SAVED_ACCOUNTS)));
+}
+
+export function removeSavedAccount(phone: string) {
+  if (typeof window === "undefined") return;
+
+  const normalized = normalizeRuPhone(phone);
+  if (!normalized) return;
+
+  const accounts = getSavedAccounts().filter((item) => item.phone !== normalized);
+  localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(accounts));
+}
+
+export function clearUserSession() {
+  if (typeof window === "undefined") return;
+
+  localStorage.removeItem(NAME_KEY);
+  localStorage.removeItem(PHONE_KEY);
+  localStorage.removeItem(AVATAR_KEY);
+  dispatchUserUpdated();
 }
 
 export function profileCompletionPercent(

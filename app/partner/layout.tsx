@@ -1,6 +1,6 @@
-import Link from "next/link";
 import { AppLogo } from "@/components/AppLogo";
 import { NotificationWatcher } from "@/components/NotificationWatcher";
+import { PartnerHeaderActions } from "@/components/partner/PartnerHeaderActions";
 
 export default function PartnerLayout({
   children,
@@ -23,9 +23,7 @@ export default function PartnerLayout({
               <p className="text-sm text-muted">Кабинет для предприятий · Якутск</p>
             </div>
           </div>
-          <Link href="/" className="shrink-0 text-sm font-medium text-brand">
-            В приложение →
-          </Link>
+          <PartnerHeaderActions />
         </div>
       </header>
       <main className="mx-auto max-w-2xl px-4 py-6">{children}</main>

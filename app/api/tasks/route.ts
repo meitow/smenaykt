@@ -21,6 +21,7 @@ import {
   TIME_FILTERS,
   resolveWhenRange,
 } from "@/lib/task-filters";
+import { assertPhoneNotBanned } from "@/lib/ban-list";
 
 function parseCategory(value: string | null) {
   return normalizeCategory(value ?? undefined);
@@ -125,6 +126,11 @@ export async function POST(request: NextRequest) {
 
     if (!isValidRuPhone(phone)) {
       return NextResponse.json({ error: "Введите телефон: +7 и 10 цифр" }, { status: 400 });
+    }
+
+    const bannedMessage = await assertPhoneNotBanned(phone);
+    if (bannedMessage) {
+      return NextResponse.json({ error: bannedMessage }, { status: 403 });
     }
 
     if (!scheduledAt) {

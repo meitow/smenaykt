@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { legalDocPath } from "@/lib/legal";
 import { useRouter } from "next/navigation";
 import { DetailSheet } from "@/components/DetailSheet";
 import { formatRuPhone, isValidRuPhone, normalizeRuPhone, ruPhoneLocalPart } from "@/lib/phone";
@@ -386,7 +387,17 @@ export function TaskDetailActions({
                 onChange={(e) => setTermsAccepted(e.target.checked)}
                 className="mt-0.5 h-5 w-5 shrink-0 rounded border-line accent-brand"
               />
-              <span className="text-[14px] leading-snug text-ink">{t("task.acceptTermsCheckbox")}</span>
+              <span className="text-[14px] leading-snug text-ink">
+                {t("task.acceptTermsPrefix")}{" "}
+                <Link
+                  href={legalDocPath("offer")}
+                  className="font-semibold text-brand underline underline-offset-2"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {t("task.acceptTermsLink")}
+                </Link>{" "}
+                {t("task.acceptTermsSuffix")}
+              </span>
             </label>
             {error && <p className="text-center text-[14px] text-rose-600">{error}</p>}
             <button

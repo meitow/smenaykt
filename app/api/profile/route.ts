@@ -6,6 +6,7 @@ import {
   serializeUserProfile,
 } from "@/lib/profile";
 import { saveProfilePacket } from "@/lib/profile-save";
+import { assertPhoneNotBanned } from "@/lib/ban-list";
 import { isValidRuPhone, normalizeRuPhone } from "@/lib/phone";
 
 export async function GET(request: NextRequest) {
@@ -57,6 +58,11 @@ export async function PATCH(request: NextRequest) {
 
     if (!phone || !isValidRuPhone(phone)) {
       return NextResponse.json({ error: "Укажите телефон в профиле" }, { status: 400 });
+    }
+
+    const bannedMessage = await assertPhoneNotBanned(phone);
+    if (bannedMessage) {
+      return NextResponse.json({ error: bannedMessage }, { status: 403 });
     }
 
     const updated = await saveProfilePacket({

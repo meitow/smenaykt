@@ -3,6 +3,7 @@ import { getPartnerTaskForStore, partnerInviteFromRequest } from "@/lib/partner-
 import { ensureUserProfile } from "@/lib/profile";
 import { prisma } from "@/lib/prisma";
 import { toClientTask } from "@/lib/tasks";
+import { assertPhoneNotBanned } from "@/lib/ban-list";
 import { isValidRuPhone, normalizeRuPhone } from "@/lib/phone";
 
 export async function POST(
@@ -37,6 +38,11 @@ export async function POST(
 
     if (!workerPhone || !isValidRuPhone(workerPhone)) {
       return NextResponse.json({ error: "Выберите исполнителя" }, { status: 400 });
+    }
+
+    const bannedMessage = await assertPhoneNotBanned(workerPhone);
+    if (bannedMessage) {
+      return NextResponse.json({ error: bannedMessage }, { status: 403 });
     }
 
     const storePhone = normalizeRuPhone(result.store.phone);

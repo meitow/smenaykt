@@ -3,6 +3,7 @@ import { mkdir, writeFile } from "fs/promises";
 import path from "path";
 import { NextRequest, NextResponse } from "next/server";
 import { ensureUserProfile } from "@/lib/profile";
+import { assertPhoneNotBanned } from "@/lib/ban-list";
 import { isValidRuPhone, normalizeRuPhone } from "@/lib/phone";
 import { prisma } from "@/lib/prisma";
 
@@ -26,6 +27,11 @@ export async function POST(request: NextRequest) {
 
     if (!phone || !isValidRuPhone(phone)) {
       return NextResponse.json({ error: "Укажите телефон в профиле" }, { status: 400 });
+    }
+
+    const bannedMessage = await assertPhoneNotBanned(phone);
+    if (bannedMessage) {
+      return NextResponse.json({ error: bannedMessage }, { status: 403 });
     }
 
     if (!(file instanceof File)) {

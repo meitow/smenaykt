@@ -30,6 +30,12 @@ npm run dev
 2. Open `/` or `/tasks` → see it with badge **Предприятие**  
 3. Open `/post` → publish a home task → appears with **От человека**
 
+## Moderation & legal (draft)
+
+- Ban list: set `ADMIN_SECRET` in `.env`, open `/admin/bans`
+- Legal placeholders (fill text later): `/legal/offer`, `/legal/privacy`, `/legal/terms`
+- Profile → **Данные**: switch accounts, logout, links to legal pages
+
 ## Stack
 
 Next.js 15 · Prisma · SQLite (dev) · TypeScript · Tailwind

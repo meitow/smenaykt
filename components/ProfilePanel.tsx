@@ -6,7 +6,7 @@ import { DetailSheet } from "@/components/DetailSheet";
 import { ProfileHero, ProfileStatsGrid } from "@/components/profile/ProfileHero";
 import { ProfilePhoneField } from "@/components/TaskDetailActions";
 import { StarRating } from "@/components/StarRating";
-import { isValidRuPhone, normalizeRuPhone } from "@/lib/phone";
+import { isValidRuPhone, normalizeRuPhone, formatRuPhone } from "@/lib/phone";
 import {
   isTaskPublisher,
   isTaskWorker,
@@ -15,14 +15,20 @@ import {
   userCanConfirmComplete,
 } from "@/lib/task-completion";
 import type { ProfileData, ProfilePendingReview, ProfileReview, Task } from "@/lib/types";
+import { legalDocPath } from "@/lib/legal";
 import {
+  clearUserSession,
+  getSavedAccounts,
+  getUserAvatarUrl,
   getUserDisplayName,
   getUserPhone,
-  getUserAvatarUrl,
   profileCompletionPercent,
+  rememberAccount,
+  removeSavedAccount,
   setUserAvatarUrl,
   setUserDisplayName,
   setUserPhone,
+  type SavedAccount,
 } from "@/lib/user-session";
 import { t } from "@/lib/i18n";
 
@@ -166,6 +172,12 @@ export function ProfilePanel() {
   const [reviewSubmitting, setReviewSubmitting] = useState(false);
   const [reviewError, setReviewError] = useState("");
   const [error, setError] = useState("");
+  const [savedAccounts, setSavedAccounts] = useState<SavedAccount[]>([]);
+  const [switchingAccount, setSwitchingAccount] = useState(false);
+
+  const refreshSavedAccounts = useCallback(() => {
+    setSavedAccounts(getSavedAccounts());
+  }, []);
 
   const loadProfile = useCallback(async (userPhone: string) => {
     if (!isValidRuPhone(userPhone)) {
@@ -222,6 +234,12 @@ export function ProfilePanel() {
     setUserPhone(data.phone);
     if (data.avatarUrl) setUserAvatarUrl(data.avatarUrl);
     else setUserAvatarUrl("");
+    rememberAccount({
+      phone: data.phone,
+      name: data.name,
+      avatarUrl: data.avatarUrl ?? undefined,
+    });
+    refreshSavedAccounts();
   }
 
   useEffect(() => {
@@ -252,7 +270,15 @@ export function ProfilePanel() {
         });
       })
       .catch(() => undefined);
-  }, []);
+
+    refreshSavedAccounts();
+  }, [refreshSavedAccounts]);
+
+  useEffect(() => {
+    const onUserUpdated = () => refreshSavedAccounts();
+    window.addEventListener("smenaykt_user_updated", onUserUpdated);
+    return () => window.removeEventListener("smenaykt_user_updated", onUserUpdated);
+  }, [refreshSavedAccounts]);
 
   useEffect(() => {
     if (isValidRuPhone(savedPhone)) {
@@ -342,6 +368,101 @@ export function ProfilePanel() {
   function onBioChange(value: string) {
     setBio(value);
     setSaveSuccess(false);
+  }
+
+  function resetToGuest() {
+    setSavedPhone("");
+    setSavedName("");
+    setSavedBio("");
+    setSavedAvatarUrl(null);
+    setName("");
+    setPhone("");
+    setBio("");
+    setAvatarUrl(null);
+    setProfile(null);
+    setSaveSuccess(false);
+    setError("");
+  }
+
+  function logout() {
+    if (isValidRuPhone(savedPhone)) {
+      rememberAccount({
+        phone: savedPhone,
+        name: savedName.trim() || t("profile.guest"),
+        avatarUrl: savedAvatarUrl ?? undefined,
+      });
+    }
+    clearUserSession();
+    resetToGuest();
+    refreshSavedAccounts();
+  }
+
+  function startAddAccount() {
+    if (hasUnsavedChanges) {
+      syncDraftFromSaved();
+    }
+    if (isValidRuPhone(savedPhone)) {
+      rememberAccount({
+        phone: savedPhone,
+        name: savedName.trim() || t("profile.guest"),
+        avatarUrl: savedAvatarUrl ?? undefined,
+      });
+    }
+    clearUserSession();
+    resetToGuest();
+    refreshSavedAccounts();
+    setTab("settings");
+  }
+
+  async function switchToAccount(targetPhone: string) {
+    if (!isValidRuPhone(targetPhone)) return;
+    if (normalizeRuPhone(targetPhone) === normalizeRuPhone(savedPhone)) return;
+
+    if (hasUnsavedChanges) {
+      syncDraftFromSaved();
+    }
+
+    setSwitchingAccount(true);
+    setError("");
+
+    try {
+      const res = await fetch(`/api/profile?phone=${encodeURIComponent(targetPhone)}&lookup=1`);
+      const data = (await res.json()) as {
+        error?: string;
+        phone?: string;
+        name?: string;
+        bio?: string;
+        avatarUrl?: string | null;
+      };
+
+      if (!res.ok) {
+        applySavedProfile({
+          phone: targetPhone,
+          name: "",
+          bio: "",
+          avatarUrl: null,
+        });
+      } else {
+        applySavedProfile({
+          phone: data.phone ?? targetPhone,
+          name: data.name?.trim() ?? "",
+          bio: data.bio?.trim() ?? "",
+          avatarUrl: data.avatarUrl ?? null,
+        });
+      }
+
+      setSaveSuccess(false);
+      await loadProfile(targetPhone);
+    } catch {
+      setError(t("profile.loadError"));
+    } finally {
+      setSwitchingAccount(false);
+    }
+  }
+
+  function forgetAccount(targetPhone: string) {
+    removeSavedAccount(targetPhone);
+    refreshSavedAccounts();
   }
 
   async function saveChanges() {
@@ -654,7 +775,73 @@ export function ProfilePanel() {
 
       {tab === "settings" && (
         <section className="info-card p-5">
-          <label className="block">
+          <div className="rounded-2xl bg-page px-4 py-4">
+            <h2 className="text-[15px] font-semibold text-ink">{t("profile.accountsTitle")}</h2>
+            <p className="mt-1 text-[13px] text-muted">{t("profile.accountsHint")}</p>
+
+            {savedAccounts.length > 0 && (
+              <ul className="mt-3 space-y-2">
+                {savedAccounts.map((account) => {
+                  const active =
+                    normalizeRuPhone(savedPhone) === normalizeRuPhone(account.phone);
+                  return (
+                    <li
+                      key={account.phone}
+                      className="flex items-center justify-between gap-2 rounded-xl border border-line bg-white px-3 py-2.5"
+                    >
+                      <button
+                        type="button"
+                        disabled={switchingAccount || active}
+                        onClick={() => switchToAccount(account.phone)}
+                        className="min-w-0 flex-1 text-left active:opacity-80 disabled:opacity-100"
+                      >
+                        <p className="truncate font-medium text-ink">
+                          {account.name.trim() || t("profile.guest")}
+                        </p>
+                        <p className="truncate text-[13px] text-muted">{formatRuPhone(account.phone)}</p>
+                      </button>
+                      <div className="flex shrink-0 items-center gap-2">
+                        {active && (
+                          <span className="rounded-full bg-brand-light px-2 py-0.5 text-[12px] font-semibold text-brand-dark">
+                            {t("profile.accountActive")}
+                          </span>
+                        )}
+                        {!active && (
+                          <button
+                            type="button"
+                            onClick={() => forgetAccount(account.phone)}
+                            className="text-[12px] font-medium text-muted active:opacity-80"
+                          >
+                            {t("profile.forgetAccount")}
+                          </button>
+                        )}
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+
+            <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+              <button
+                type="button"
+                onClick={startAddAccount}
+                className="btn-secondary flex-1 !py-3 text-[15px]"
+              >
+                {t("profile.addAccount")}
+              </button>
+              <button
+                type="button"
+                onClick={logout}
+                disabled={!savedPhone && !savedName}
+                className="btn-secondary flex-1 !py-3 text-[15px] disabled:opacity-50"
+              >
+                {t("profile.logout")}
+              </button>
+            </div>
+          </div>
+
+          <label className="mt-5 block">
             <span className="text-[15px] font-medium text-muted">{t("profile.nameLabel")}</span>
             <input
               value={name}
@@ -718,6 +905,21 @@ export function ProfilePanel() {
             >
               {saving ? t("profile.saving") : t("profile.saveChanges")}
             </button>
+          </div>
+
+          <div className="mt-6 border-t border-line pt-5">
+            <h2 className="text-[15px] font-semibold text-ink">{t("profile.legalTitle")}</h2>
+            <div className="mt-3 space-y-2">
+              <Link href={legalDocPath("offer")} className="block text-[15px] font-medium text-brand">
+                {t("legal.offerTitle")}
+              </Link>
+              <Link href={legalDocPath("privacy")} className="block text-[15px] font-medium text-brand">
+                {t("legal.privacyTitle")}
+              </Link>
+              <Link href={legalDocPath("terms")} className="block text-[15px] font-medium text-brand">
+                {t("legal.termsTitle")}
+              </Link>
+            </div>
           </div>
         </section>
       )}
