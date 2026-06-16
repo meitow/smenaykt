@@ -607,7 +607,7 @@ export function ProfilePanel() {
 
       {tab === "history" && (
         <section className="info-card">
-          <div className="flex gap-2 overflow-x-auto px-4 pt-4">
+          <div className="flex gap-2 overflow-x-auto px-4 pt-4 scrollbar-none [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
             {historyFilters.map((item) => (
               <button
                 key={item.key}

@@ -23,6 +23,8 @@ type TaskFiltersCompactProps = {
   onChange: (next: TaskListFilters) => void;
   resultCount?: number;
   hideSourceFilter?: boolean;
+  compact?: boolean;
+  embedded?: boolean;
 };
 
 function labelForSource(v: SourceFilter) {
@@ -50,6 +52,8 @@ export function TaskFiltersCompact({
   onChange,
   resultCount,
   hideSourceFilter = false,
+  compact = false,
+  embedded = false,
 }: TaskFiltersCompactProps) {
   const [openSheet, setOpenSheet] = useState<SheetKey | null>(null);
 
@@ -115,54 +119,66 @@ export function TaskFiltersCompact({
     );
   }
 
-  return (
-    <>
-      <div className="space-y-2">
-        <label className="block">
-          <span className="sr-only">{t("filters.searchLabel")}</span>
-          <input
-            type="search"
-            value={value.search}
-            onChange={(e) => onChange({ ...value, search: e.target.value })}
-            placeholder={t("filters.searchPlaceholder")}
-            className="input-field !mt-0"
-            autoComplete="off"
-          />
-        </label>
+  const filterGridClass =
+    triggers.length === 3
+      ? "grid grid-cols-3 gap-2"
+      : compact
+        ? "filter-scroll-row"
+        : "grid grid-cols-2 gap-2 sm:grid-cols-4";
 
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-          {triggers.map((item) => (
-            <button
-              key={item.key}
-              type="button"
-              onClick={() => setOpenSheet(item.key)}
-              className={`filter-trigger w-full ${item.active ? "filter-trigger-active" : ""}`}
-            >
-              <span className="filter-trigger-label">{item.label}</span>
-              <span className="filter-trigger-value">
-                <span className="filter-trigger-value-text">{item.current}</span>
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" className="shrink-0" aria-hidden>
-                  <path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                </svg>
-              </span>
-            </button>
-          ))}
-        </div>
+  const triggerClass = compact ? "filter-trigger-compact" : "filter-trigger";
 
-        {typeof resultCount === "number" && (
-          <p className="text-[14px] font-medium text-muted">{t("filters.results", { count: resultCount })}</p>
-        )}
+  const content = (
+    <div className={embedded ? "space-y-2" : "space-y-2"}>
+      <label className="block">
+        <span className="sr-only">{t("filters.searchLabel")}</span>
+        <input
+          type="search"
+          value={value.search}
+          onChange={(e) => onChange({ ...value, search: e.target.value })}
+          placeholder={t("filters.searchPlaceholder")}
+          className={`input-field !mt-0 ${compact ? "!py-2.5 text-[16px]" : ""}`}
+          autoComplete="off"
+        />
+      </label>
 
-        {hasActiveFilters && (
+      <div className={filterGridClass}>
+        {triggers.map((item) => (
           <button
+            key={item.key}
             type="button"
-            onClick={resetFilters}
-            className="text-[14px] font-medium text-brand"
+            onClick={() => setOpenSheet(item.key)}
+            className={`${triggerClass} w-full ${item.active ? "filter-trigger-active" : ""}`}
           >
+            <span className="filter-trigger-label">{item.label}</span>
+            <span className="filter-trigger-value">
+              <span className="filter-trigger-value-text">{item.current}</span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" className="shrink-0" aria-hidden>
+                <path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+              </svg>
+            </span>
+          </button>
+        ))}
+      </div>
+
+      <div className="flex items-center justify-between gap-3">
+        {typeof resultCount === "number" ? (
+          <p className="text-[13px] font-medium text-muted">{t("filters.results", { count: resultCount })}</p>
+        ) : (
+          <span />
+        )}
+        {hasActiveFilters ? (
+          <button type="button" onClick={resetFilters} className="text-[13px] font-medium text-brand">
             {t("filters.reset")}
           </button>
-        )}
+        ) : null}
       </div>
+    </div>
+  );
+
+  return (
+    <>
+      {embedded ? content : <div className="info-card p-3">{content}</div>}
 
       <CategoryFilterSheet
         open={openSheet === "category"}

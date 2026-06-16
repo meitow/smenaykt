@@ -3,9 +3,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { EmptyState } from "@/components/EmptyState";
 import { HomeSidebar } from "@/components/HomeSidebar";
-import { HomeHero } from "@/components/HomeHero";
+import { HomeExplorePanel } from "@/components/HomeExplorePanel";
 import { LoadingSkeleton } from "@/components/LoadingSkeleton";
-import { SourceSegment } from "@/components/SourceSegment";
 import { TaskCard } from "@/components/TaskCard";
 import { TaskFiltersCompact } from "@/components/TaskFiltersCompact";
 import type { Task } from "@/lib/types";
@@ -103,25 +102,24 @@ export function TaskFeed({
   return (
     <div className={showHero ? "lg:grid lg:grid-cols-[minmax(0,1fr)_17rem] lg:items-start lg:gap-6" : ""}>
       <div className="space-y-3 min-w-0">
-      {showHero && (
-        <HomeHero taskCount={loading ? undefined : tasks.length} loading={loading} />
-      )}
-
-      {!fixedSource && showHero && (
-        <SourceSegment
-          value={filters.source}
-          onChange={(source) => handleFiltersChange({ ...filters, source })}
-        />
-      )}
-
-      <div className="animate-fade-in opacity-0" style={{ animationDelay: "80ms" }}>
-        <TaskFiltersCompact
-          value={filters}
+      {showHero ? (
+        <HomeExplorePanel
+          filters={filters}
           onChange={handleFiltersChange}
           resultCount={loading ? undefined : tasks.length}
-          hideSourceFilter={Boolean(fixedSource) || showHero}
+          taskCount={loading ? undefined : tasks.length}
+          loading={loading}
         />
-      </div>
+      ) : (
+        <div className="animate-fade-in opacity-0" style={{ animationDelay: "80ms" }}>
+          <TaskFiltersCompact
+            value={filters}
+            onChange={handleFiltersChange}
+            resultCount={loading ? undefined : tasks.length}
+            hideSourceFilter={Boolean(fixedSource)}
+          />
+        </div>
+      )}
 
       {loadError ? (
         <div className="info-card animate-scale-in p-5 text-center opacity-0">

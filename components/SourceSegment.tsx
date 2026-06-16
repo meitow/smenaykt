@@ -43,7 +43,7 @@ export function SourceSegment({ value, onChange }: SourceSegmentProps) {
             role="tab"
             aria-selected={active}
             onClick={() => onChange(option)}
-            className={`relative z-10 flex-1 rounded-xl px-2 py-2 text-center text-[14px] font-semibold transition-colors duration-200 ${
+            className={`relative z-10 flex-1 rounded-xl px-2 py-1.5 text-center text-[13px] font-semibold transition-colors duration-200 ${
               active ? "text-ink" : "text-muted"
             }`}
           >
