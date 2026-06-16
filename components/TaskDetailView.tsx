@@ -8,7 +8,7 @@ import { PressableRow } from "@/components/PressableRow";
 import { TaskDetailActions } from "@/components/TaskDetailActions";
 import { WhatsAppShareButton } from "@/components/WhatsAppShareButton";
 import { formatHourlyRate } from "@/lib/pay";
-import { build2GisPlaceUrl, build2GisRouteUrl } from "@/lib/maps";
+import { build2GisPlaceUrl } from "@/lib/maps";
 import { formatRuPhone } from "@/lib/phone";
 import { formatDuration } from "@/lib/task-filters";
 import type { Task } from "@/lib/types";
@@ -33,7 +33,6 @@ export function TaskDetailView({ task }: TaskDetailViewProps) {
   const lines = task.description ? descriptionLines(task.description) : [];
   const hourlyRate = Math.round(task.pay / Math.max(task.durationHours, 1));
   const mapUrl = build2GisPlaceUrl(task.place, t("brand.city"));
-  const routeUrl = build2GisRouteUrl(task.place, t("brand.city"));
 
   const payValueClass = "text-[22px] font-extrabold tabular-nums tracking-tight text-pay";
 
@@ -91,10 +90,8 @@ export function TaskDetailView({ task }: TaskDetailViewProps) {
               </div>
             }
             title={task.place}
-            subtitle={t("task.openIn2GisHint")}
+            subtitle={t("task.location2GisHint", { city: t("brand.city") })}
           />
-          <div className="mx-4 border-t border-line" />
-          <PressableRow href={routeUrl} title={t("task.routeIn2Gis")} subtitle={t("brand.city")} />
         </div>
 
         <div className="mt-3 overflow-hidden rounded-2xl bg-surface ring-1 ring-black/[0.04]">

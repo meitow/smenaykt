@@ -94,6 +94,7 @@
     "placeTitle": "Место",
     "openIn2Gis": "Открыть в 2GIS",
     "openIn2GisHint": "Нажмите — откроется 2GIS",
+    "location2GisHint": "Карта и маршрут в 2GIS · {city}",
     "routeIn2Gis": "Маршрут в 2GIS",
     "aboutPartner": "О партнёре",
     "partnerHint": "Задание опубликовано предприятием-партнёром SmenaYKT. Уточняйте детали смены по телефону.",
