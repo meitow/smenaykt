@@ -15,6 +15,19 @@ type Overview = {
   doneTasks: number;
   bans: number;
   moderators: number;
+  pendingIdentity: number;
+};
+
+type IdentityRow = {
+  id: string;
+  phone: string;
+  status: string;
+  mimeType: string;
+  fileSize: number;
+  rejectReason: string;
+  reviewedAt: string | null;
+  createdAt: string;
+  profileName: string;
 };
 
 type BanRow = {
@@ -54,7 +67,13 @@ type UserLookup = {
 };
 
 function parseTab(value: string | null): AdminTab {
-  if (value === "tasks" || value === "bans" || value === "users" || value === "moderators") {
+  if (
+    value === "tasks" ||
+    value === "bans" ||
+    value === "users" ||
+    value === "moderators" ||
+    value === "identity"
+  ) {
     return value;
   }
   return "overview";
@@ -67,6 +86,7 @@ export function AdminDashboard({ initialTab }: { initialTab?: string }) {
   const [bans, setBans] = useState<BanRow[]>([]);
   const [tasks, setTasks] = useState<AdminTask[]>([]);
   const [moderators, setModerators] = useState<ModeratorRow[]>([]);
+  const [identityQueue, setIdentityQueue] = useState<IdentityRow[]>([]);
   const [userLookup, setUserLookup] = useState<UserLookup | null>(null);
   const [banPhone, setBanPhone] = useState("");
   const [banReason, setBanReason] = useState("");
@@ -100,13 +120,20 @@ export function AdminDashboard({ initialTab }: { initialTab?: string }) {
     if (res.ok) setModerators(data.moderators ?? []);
   }, [auth.authHeaders]);
 
+  const loadIdentityQueue = useCallback(async () => {
+    const res = await fetch("/api/admin/identity?status=pending", { headers: auth.authHeaders() });
+    const data = (await res.json()) as { submissions?: IdentityRow[] };
+    if (res.ok) setIdentityQueue(data.submissions ?? []);
+  }, [auth.authHeaders]);
+
   useEffect(() => {
     if (!auth.session) return;
     void loadOverview();
     if (tab === "bans") void loadBans();
     if (tab === "tasks") void loadTasks();
     if (tab === "moderators") void loadModerators();
-  }, [auth.session, tab, loadOverview, loadBans, loadTasks, loadModerators]);
+    if (tab === "identity") void loadIdentityQueue();
+  }, [auth.session, tab, loadOverview, loadBans, loadTasks, loadModerators, loadIdentityQueue]);
 
   async function addBan(event: React.FormEvent) {
     event.preventDefault();
@@ -237,6 +264,36 @@ export function AdminDashboard({ initialTab }: { initialTab?: string }) {
     }
   }
 
+  async function openIdentityFile(id: string) {
+    const res = await fetch(`/api/admin/identity/${id}/file`, { headers: auth.authHeaders() });
+    if (!res.ok) {
+      setPanelError(t("admin.identityFileError"));
+      return;
+    }
+    const blob = await res.blob();
+    window.open(URL.createObjectURL(blob), "_blank", "noopener,noreferrer");
+  }
+
+  async function reviewIdentity(id: string, action: "approve" | "reject", rejectReason = "") {
+    setBusy(true);
+    setPanelError("");
+    try {
+      const res = await fetch(`/api/admin/identity/${id}/review`, {
+        method: "POST",
+        headers: auth.authHeaders(),
+        body: JSON.stringify({ action, rejectReason }),
+      });
+      if (!res.ok) {
+        const data = (await res.json()) as { error?: string };
+        setPanelError(data.error ?? t("admin.saveError"));
+        return;
+      }
+      await Promise.all([loadIdentityQueue(), loadOverview()]);
+    } finally {
+      setBusy(false);
+    }
+  }
+
   if (auth.loading) {
     return (
       <div className="flex min-h-screen items-center justify-center text-[15px] text-muted">
@@ -312,6 +369,7 @@ export function AdminDashboard({ initialTab }: { initialTab?: string }) {
             { label: t("admin.statDone"), value: overview.doneTasks },
             { label: t("admin.statBans"), value: overview.bans },
             { label: t("admin.statModerators"), value: overview.moderators },
+            { label: t("admin.statIdentityPending"), value: overview.pendingIdentity },
           ].map((item) => (
             <div key={item.label} className="info-card p-4">
               <p className="text-[28px] font-bold text-ink">{item.value}</p>
@@ -399,6 +457,63 @@ export function AdminDashboard({ initialTab }: { initialTab?: string }) {
                   </li>
                 );
               })}
+            </ul>
+          )}
+        </section>
+      )}
+
+      {tab === "identity" && (
+        <section className="info-card">
+          <h2 className="px-4 pt-4 text-[17px] font-semibold text-ink">{t("admin.identityTitle")}</h2>
+          <p className="px-4 pb-2 text-[14px] text-muted">{t("admin.identityHint")}</p>
+          {identityQueue.length === 0 ? (
+            <p className="px-4 py-4 text-[14px] text-muted">{t("admin.identityEmpty")}</p>
+          ) : (
+            <ul className="mt-1 divide-y divide-line">
+              {identityQueue.map((row) => (
+                <li key={row.id} className="px-4 py-3.5">
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="font-medium text-ink">{row.profileName}</p>
+                      <p className="mt-1 text-[13px] text-muted">{formatRuPhone(row.phone)}</p>
+                      <p className="mt-1 text-[12px] text-muted">
+                        {new Date(row.createdAt).toLocaleString("ru-RU")} ·{" "}
+                        {Math.round(row.fileSize / 1024)} КБ
+                      </p>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      <button
+                        type="button"
+                        disabled={busy}
+                        onClick={() => openIdentityFile(row.id)}
+                        className="rounded-xl bg-page px-3 py-2 text-[13px] font-semibold text-ink"
+                      >
+                        {t("admin.identityOpenFile")}
+                      </button>
+                      <button
+                        type="button"
+                        disabled={busy}
+                        onClick={() => reviewIdentity(row.id, "approve")}
+                        className="rounded-xl bg-taiga/15 px-3 py-2 text-[13px] font-semibold text-taiga"
+                      >
+                        {t("admin.identityApprove")}
+                      </button>
+                      <button
+                        type="button"
+                        disabled={busy}
+                        onClick={() => {
+                          const reason = window.prompt(t("admin.identityRejectPrompt"));
+                          if (reason === null) return;
+                          void reviewIdentity(row.id, "reject", reason);
+                        }}
+                        className="rounded-xl bg-rose-50 px-3 py-2 text-[13px] font-semibold text-rose-700"
+                      >
+                        {t("admin.identityReject")}
+                      </button>
+                    </div>
+                  </div>
+                </li>
+              ))}
             </ul>
           )}
         </section>

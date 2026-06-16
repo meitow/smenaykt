@@ -18,12 +18,15 @@ model Store {
 }
 
 model UserProfile {
-  phone     String   @id
-  name      String   @default("")
-  avatarUrl String?
-  bio       String   @default("")
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  phone              String    @id
+  name               String    @default("")
+  avatarUrl          String?
+  bio                String    @default("")
+  identityVerified   Boolean   @default(false)
+  identityVerifiedAt DateTime?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  identityDocuments  IdentityDocument[]
 }
 
 model Task {
@@ -123,4 +126,24 @@ model TaskChatReadState {
 
   @@unique([taskId, participantType, participantId])
   @@index([participantType, participantId])
+}
+
+model IdentityDocument {
+  id              String   @id @default(cuid())
+  phone           String
+  profile         UserProfile @relation(fields: [phone], references: [phone], onDelete: Cascade)
+  status          String   @default("pending") // pending | approved | rejected
+  storageKey      String
+  storageBackend  String   @default("local") // local | s3
+  mimeType        String
+  fileSize        Int
+  consentAt       DateTime
+  reviewedAt      DateTime?
+  reviewedBy      String   @default("")
+  rejectReason    String   @default("")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([phone, createdAt])
+  @@index([status, createdAt])
 }

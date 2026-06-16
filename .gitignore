@@ -18,6 +18,10 @@ out/
 public/uploads/avatars/*
 !public/uploads/avatars/.gitkeep
 
+# private documents (passports) — never commit
+private-uploads/**
+!private-uploads/.gitkeep
+
 # debug / os
 npm-debug.log*
 .DS_Store

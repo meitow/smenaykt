@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { DetailSheet } from "@/components/DetailSheet";
+import { ProfileIdentitySection } from "@/components/profile/ProfileIdentitySection";
 import { ProfileHero, ProfileStatsGrid } from "@/components/profile/ProfileHero";
 import { ProfileMenuNav, type ProfileSectionKey } from "@/components/profile/ProfileMenuNav";
 import { ProfilePhoneField } from "@/components/TaskDetailActions";
@@ -825,10 +826,7 @@ export function ProfilePanel() {
         <section className="info-card p-5">
           <ProfilePhoneField value={phone} onChange={onPhoneChange} />
 
-          <div className="mt-5 rounded-xl bg-page px-4 py-3.5">
-            <p className="text-[15px] font-semibold text-ink">{t("profile.documentsTitle")}</p>
-            <p className="mt-1 text-[14px] leading-snug text-muted">{t("profile.documentsHint")}</p>
-          </div>
+          <ProfileIdentitySection phone={phone} />
 
           {contactsUnsaved && phone !== savedPhone && isValidRuPhone(phone) && (
             <p className="mt-4 text-[13px] text-muted">{t("profile.accountSwitchHint")}</p>

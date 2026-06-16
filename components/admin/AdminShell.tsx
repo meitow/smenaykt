@@ -4,11 +4,12 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { t } from "@/lib/i18n";
 
-export type AdminTab = "overview" | "tasks" | "bans" | "users" | "moderators";
+export type AdminTab = "overview" | "tasks" | "bans" | "users" | "moderators" | "identity";
 
 const TABS: { key: AdminTab; labelKey: string }[] = [
   { key: "overview", labelKey: "admin.tabOverview" },
   { key: "tasks", labelKey: "admin.tabTasks" },
+  { key: "identity", labelKey: "admin.tabIdentity" },
   { key: "bans", labelKey: "admin.tabBans" },
   { key: "users", labelKey: "admin.tabUsers" },
   { key: "moderators", labelKey: "admin.tabModerators" },
