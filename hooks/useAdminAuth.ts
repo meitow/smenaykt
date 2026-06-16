@@ -11,6 +11,14 @@ export type AdminSession = {
   canManageModerators: boolean;
 };
 
+function sessionHeaders(secret: string, phone: string | null): HeadersInit {
+  return {
+    "Content-Type": "application/json",
+    ...(phone ? { "x-moderator-phone": phone } : {}),
+    ...(secret ? { "x-admin-secret": secret } : {}),
+  };
+}
+
 export function useAdminAuth() {
   const [session, setSession] = useState<AdminSession | null>(null);
   const [secret, setSecret] = useState("");
@@ -20,66 +28,90 @@ export function useAdminAuth() {
 
   useEffect(() => {
     const saved = sessionStorage.getItem(SECRET_KEY)?.trim() ?? "";
-    if (saved) {
-      setStoredSecret(saved);
-      setSecret(saved);
+    const fromUrl =
+      typeof window !== "undefined"
+        ? new URLSearchParams(window.location.search).get("secret")?.trim() ?? ""
+        : "";
+    const initial = saved || fromUrl;
+    if (fromUrl) {
+      sessionStorage.setItem(SECRET_KEY, fromUrl);
+    }
+    if (initial) {
+      setStoredSecret(initial);
+      setSecret(initial);
     }
   }, []);
 
   const authHeaders = useCallback((): HeadersInit => {
     const phone = getUserPhone();
-    const activeSecret = storedSecret.trim();
-    return {
-      "Content-Type": "application/json",
-      ...(phone ? { "x-moderator-phone": phone } : {}),
-      ...(activeSecret ? { "x-admin-secret": activeSecret } : {}),
-    };
+    return sessionHeaders(storedSecret.trim(), phone);
   }, [storedSecret]);
 
-  const refreshSession = useCallback(async () => {
-    setLoading(true);
-    setError("");
-
-    try {
-      const res = await fetch("/api/admin/session", { headers: authHeaders() });
-      const data = (await res.json()) as AdminSession & { error?: string };
-
-      if (!res.ok) {
-        setSession(null);
-        setError(data.error ?? "Нет доступа");
-        return;
+  const refreshSession = useCallback(
+    async (options?: { showError?: boolean; secretOverride?: string }) => {
+      setLoading(true);
+      if (options?.showError) {
+        setError("");
       }
 
-      setSession({
-        phone: data.phone,
-        viaSecret: data.viaSecret,
-        canManageModerators: data.canManageModerators,
-      });
-      setError("");
-    } catch {
-      setSession(null);
-      setError("Не удалось проверить доступ");
-    } finally {
-      setLoading(false);
-    }
-  }, [authHeaders]);
+      const activeSecret = (options?.secretOverride ?? storedSecret).trim();
+      const phone = getUserPhone();
+
+      try {
+        const res = await fetch("/api/admin/session", {
+          headers: sessionHeaders(activeSecret, phone),
+        });
+        const data = (await res.json()) as AdminSession & { error?: string };
+
+        if (!res.ok) {
+          setSession(null);
+          if (activeSecret) {
+            sessionStorage.removeItem(SECRET_KEY);
+            setStoredSecret("");
+          }
+          if (options?.showError || activeSecret) {
+            setError(data.error ?? "Неверный ключ доступа");
+          } else {
+            setError("");
+          }
+          return;
+        }
+
+        setSession({
+          phone: data.phone,
+          viaSecret: data.viaSecret,
+          canManageModerators: data.canManageModerators,
+        });
+        setError("");
+      } catch {
+        setSession(null);
+        if (options?.showError) {
+          setError("Не удалось проверить доступ");
+        }
+      } finally {
+        setLoading(false);
+      }
+    },
+    [storedSecret]
+  );
 
   useEffect(() => {
     void refreshSession();
   }, [refreshSession]);
 
-  function unlockWithSecret() {
+  async function unlockWithSecret() {
     const trimmed = secret.trim();
     if (!trimmed) return;
     sessionStorage.setItem(SECRET_KEY, trimmed);
     setStoredSecret(trimmed);
-    setError("");
+    await refreshSession({ showError: true, secretOverride: trimmed });
   }
 
   function lockSecret() {
     sessionStorage.removeItem(SECRET_KEY);
     setStoredSecret("");
     setSecret("");
+    setError("");
     void refreshSession();
   }
 

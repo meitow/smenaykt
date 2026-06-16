@@ -461,7 +461,7 @@
     "bansHint": "Блокировка номеров для приложения и partner web",
     "backToApp": "В приложение",
     "secretLabel": "Ключ владельца",
-    "secretHint": "ADMIN_SECRET на сервере — для первого входа и управления модераторами",
+    "secretHint": "Значение ADMIN_SECRET из .env на сервере. Локально по умолчанию: change-me-before-production",
     "unlock": "Войти",
     "lock": "Выйти из панели",
     "addBan": "Заблокировать номер",
