@@ -95,6 +95,14 @@ export function parseTimeRangeFromLabel(timeLabel: string): { start: string; end
   };
 }
 
+export function formatDateNumeric(value: string): string {
+  const date = parseScheduledDate(value);
+  if (!date) return value;
+
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${pad(date.getDate())}.${pad(date.getMonth() + 1)}.${date.getFullYear()}`;
+}
+
 export function formatRelativeTime(iso: string): string {
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return iso;
