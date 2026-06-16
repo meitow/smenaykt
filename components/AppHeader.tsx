@@ -88,8 +88,8 @@ export function AppHeader() {
           <div className="min-w-0 flex-1">
             <p className="truncate text-[17px] font-bold text-ink">{displayName}</p>
             <p
-              className={`truncate text-[13px] leading-snug ${
-                subtitleAction ? "font-medium text-brand-dark" : "text-muted"
+              className={`text-[13px] leading-snug ${
+                subtitleAction ? "line-clamp-2 font-medium text-brand-dark" : "truncate text-muted"
               }`}
             >
               {subtitle}
