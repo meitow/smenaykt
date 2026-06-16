@@ -113,8 +113,8 @@ export function TaskChatPanel({ taskId, taskTitle, backHref, authHeaders }: Task
   }
 
   return (
-    <div className="flex min-h-[calc(100dvh-4rem)] flex-col bg-page">
-      <div className="sticky top-0 z-10 border-b border-line bg-surface/95 px-4 py-3 backdrop-blur-md">
+    <div className="flex h-full min-h-0 flex-col overflow-hidden bg-page">
+      <header className="shrink-0 border-b border-line bg-surface px-4 pb-3 pt-[max(0.75rem,env(safe-area-inset-top))]">
         <div className="flex items-center gap-3">
           <Link href={backHref} className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-page" aria-label={t("task.backToList")}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
@@ -126,9 +126,9 @@ export function TaskChatPanel({ taskId, taskTitle, backHref, authHeaders }: Task
             <p className="truncate text-[13px] text-muted">{t("chat.subtitle")}</p>
           </div>
         </div>
-      </div>
+      </header>
 
-      <div className="flex-1 space-y-3 overflow-y-auto px-4 py-4">
+      <div className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain px-4 py-4">
         {loading ? (
           <p className="text-center text-[14px] text-muted">{t("profile.loadingTasks")}</p>
         ) : error && messages.length === 0 ? (
@@ -138,7 +138,8 @@ export function TaskChatPanel({ taskId, taskTitle, backHref, authHeaders }: Task
             {t("chat.empty")}
           </p>
         ) : (
-          messages.map((message) => (
+          <div className="space-y-3">
+          {messages.map((message) => (
             <div
               key={message.id}
               className={`flex ${message.mine ? "justify-end" : "justify-start"}`}
@@ -159,12 +160,13 @@ export function TaskChatPanel({ taskId, taskTitle, backHref, authHeaders }: Task
                 </p>
               </div>
             </div>
-          ))
+          ))}
+          </div>
         )}
         <div ref={bottomRef} />
       </div>
 
-      <div className="border-t border-line bg-surface px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+      <footer className="shrink-0 border-t border-line bg-surface px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
         {!canSend && (
           <p className="mb-2 text-center text-[13px] text-muted">{t("chat.readOnly")}</p>
         )}
@@ -188,7 +190,7 @@ export function TaskChatPanel({ taskId, taskTitle, backHref, authHeaders }: Task
             {sending ? "…" : t("chat.send")}
           </button>
         </form>
-      </div>
+      </footer>
     </div>
   );
 }

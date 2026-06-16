@@ -32,11 +32,15 @@ export default function PartnerTaskChatRoute() {
   }, [params.id, router]);
 
   if (error) {
-    return <p className="px-4 py-6 text-[14px] text-rose-600">{error}</p>;
+    return (
+      <p className="flex flex-1 items-center justify-center px-4 text-[14px] text-rose-600">{error}</p>
+    );
   }
 
   if (!title) {
-    return <p className="px-4 py-6 text-[14px] text-muted">{t("profile.loadingTasks")}</p>;
+    return (
+      <p className="flex flex-1 items-center justify-center px-4 text-[14px] text-muted">{t("profile.loadingTasks")}</p>
+    );
   }
 
   return <PartnerTaskChatPage taskId={params.id} taskTitle={title} />;

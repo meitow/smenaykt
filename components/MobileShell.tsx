@@ -1,17 +1,45 @@
 "use client";
 
+import { useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { AppHeader } from "@/components/AppHeader";
 import { FormPageHeader } from "@/components/FormPageHeader";
 import { DesktopNav } from "@/components/DesktopNav";
 import { BottomNav } from "@/components/BottomNav";
 import { NotificationWatcher } from "@/components/NotificationWatcher";
+import { isMobileTaskChatPath, isMobileTaskDetailPath } from "@/lib/route-patterns";
 import { t } from "@/lib/i18n";
 
 export function MobileShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const isDetail = /^\/tasks\/[^/]+$/.test(pathname);
+  const isTaskChat = isMobileTaskChatPath(pathname);
+  const isDetail = isMobileTaskDetailPath(pathname);
   const isPostForm = pathname === "/post";
+
+  useEffect(() => {
+    if (!isTaskChat) return;
+    const html = document.documentElement;
+    const body = document.body;
+    const prevHtmlOverflow = html.style.overflow;
+    const prevBodyOverflow = body.style.overflow;
+    html.style.overflow = "hidden";
+    body.style.overflow = "hidden";
+    return () => {
+      html.style.overflow = prevHtmlOverflow;
+      body.style.overflow = prevBodyOverflow;
+    };
+  }, [isTaskChat]);
+
+  if (isTaskChat) {
+    return (
+      <>
+        <NotificationWatcher variant="mobile" />
+        <main className="fixed inset-0 z-30 flex flex-col overflow-hidden bg-page">
+          {children}
+        </main>
+      </>
+    );
+  }
 
   return (
     <>
