@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { BackButton } from "@/components/BackButton";
 import type { ChatMessageView } from "@/lib/chat";
 import { t } from "@/lib/i18n";
+import { PULL_REFRESH_EVENT } from "@/lib/app-events";
 
 type TaskChatPanelProps = {
   taskId: string;
@@ -70,6 +71,14 @@ export function TaskChatPanel({ taskId, taskTitle, backFallbackHref, authHeaders
       cancelled = true;
       window.clearInterval(timer);
     };
+  }, [load]);
+
+  useEffect(() => {
+    const onPullRefresh = () => {
+      void load();
+    };
+    window.addEventListener(PULL_REFRESH_EVENT, onPullRefresh);
+    return () => window.removeEventListener(PULL_REFRESH_EVENT, onPullRefresh);
   }, [load]);
 
   useEffect(() => {

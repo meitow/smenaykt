@@ -9,7 +9,7 @@ import { BottomNav } from "@/components/BottomNav";
 import { NotificationWatcher } from "@/components/NotificationWatcher";
 import { PullToRefresh } from "@/components/PullToRefresh";
 import { dispatchPullRefresh } from "@/lib/app-events";
-import { isMobileTaskChatPath, isMobileTaskDetailPath } from "@/lib/route-patterns";
+import { isMobileTaskChatPath, isMobileTaskDetailPath, isPullToRefreshPath } from "@/lib/route-patterns";
 import { t } from "@/lib/i18n";
 
 const TAB_BACK_HEADERS: Record<string, string> = {
@@ -47,6 +47,7 @@ export function MobileShell({ children }: { children: React.ReactNode }) {
   if (isTaskChat) {
     return (
       <>
+        <PullToRefresh onRefresh={handlePullRefresh} />
         <NotificationWatcher variant="mobile" />
         <main className="fixed inset-0 z-30 flex flex-col overflow-hidden bg-page">
           {children}
@@ -57,7 +58,7 @@ export function MobileShell({ children }: { children: React.ReactNode }) {
 
   return (
     <>
-      <PullToRefresh onRefresh={handlePullRefresh} />
+      <PullToRefresh onRefresh={handlePullRefresh} disabled={!isPullToRefreshPath(pathname)} />
       <div className="ambient-blob -left-16 top-24 h-48 w-48 bg-brand/25" aria-hidden />
       <div className="ambient-blob -right-12 top-64 h-40 w-40 bg-taiga/20" aria-hidden />
 

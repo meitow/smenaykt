@@ -6,6 +6,7 @@ import { formatRelativeTime } from "@/lib/datetime";
 import { isValidRuPhone } from "@/lib/phone";
 import { getUserPhone } from "@/lib/user-session";
 import { t } from "@/lib/i18n";
+import { PULL_REFRESH_EVENT } from "@/lib/app-events";
 
 type ChatThread = {
   taskId: string;
@@ -50,6 +51,14 @@ export function ChatsInbox() {
     const onUserUpdate = () => void load();
     window.addEventListener("smenaykt_user_updated", onUserUpdate);
     return () => window.removeEventListener("smenaykt_user_updated", onUserUpdate);
+  }, [load]);
+
+  useEffect(() => {
+    const onPullRefresh = () => {
+      void load();
+    };
+    window.addEventListener(PULL_REFRESH_EVENT, onPullRefresh);
+    return () => window.removeEventListener(PULL_REFRESH_EVENT, onPullRefresh);
   }, [load]);
 
   const hasPhone = Boolean(phone && isValidRuPhone(phone));
