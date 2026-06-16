@@ -39,7 +39,9 @@ function RowContent({
         <p className="font-medium leading-snug text-ink">{title}</p>
         {subtitle && <p className="mt-0.5 text-[14px] text-muted">{subtitle}</p>}
       </div>
-      {value && <p className={`shrink-0 text-[17px] font-bold ${valueClassName}`}>{value}</p>}
+      {value && (
+        <p className={`shrink-0 font-bold ${valueClassName || "text-[17px] text-ink"}`}>{value}</p>
+      )}
       {showChevron && <Chevron />}
     </>
   );

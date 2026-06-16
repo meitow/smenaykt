@@ -35,7 +35,7 @@ export function TaskDetailView({ task }: TaskDetailViewProps) {
   const mapUrl = build2GisPlaceUrl(task.place, t("brand.city"));
   const routeUrl = build2GisRouteUrl(task.place, t("brand.city"));
 
-  const accentClass = isPartner ? "text-taiga" : "text-brand";
+  const payValueClass = "text-[22px] font-extrabold tabular-nums tracking-tight text-pay";
 
   return (
     <>
@@ -68,7 +68,7 @@ export function TaskDetailView({ task }: TaskDetailViewProps) {
         </div>
       </div>
 
-      <div className="px-4 pb-28 pt-4">
+      <div className="px-4 pb-[calc(11.5rem+env(safe-area-inset-bottom))] pt-4">
         <div className="flex flex-wrap gap-2">
           <span className={`rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${isPartner ? "badge-partner" : "badge-person"}`}>
             {t(`filters.category.${task.category}`)}
@@ -118,7 +118,7 @@ export function TaskDetailView({ task }: TaskDetailViewProps) {
             onClick={() => setSheet("pay")}
             title={t("task.pay")}
             value={`${task.pay.toLocaleString("ru-RU")} ₽`}
-            valueClassName={accentClass}
+            valueClassName={payValueClass}
           />
           <div className="mx-4 border-t border-line" />
           <PressableRow
@@ -184,7 +184,7 @@ export function TaskDetailView({ task }: TaskDetailViewProps) {
           <div className="border-t border-line pt-4">
             <div className="flex items-center justify-between">
               <p className="font-semibold text-ink">{t("task.pay")}</p>
-              <p className={`text-[18px] font-bold ${accentClass}`}>{task.pay.toLocaleString("ru-RU")} ₽</p>
+              <p className={`${payValueClass}`}>{task.pay.toLocaleString("ru-RU")} ₽</p>
             </div>
           </div>
         </div>
