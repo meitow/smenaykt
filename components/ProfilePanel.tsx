@@ -7,10 +7,10 @@ import { ProfileHero, ProfileStatsGrid } from "@/components/profile/ProfileHero"
 import { ProfilePhoneField } from "@/components/TaskDetailActions";
 import { StarRating } from "@/components/StarRating";
 import { isValidRuPhone, normalizeRuPhone } from "@/lib/phone";
+import { getTaskStatusBadge } from "@/lib/task-status";
 import {
   isTaskPublisher,
   isTaskWorker,
-  taskCompletionLabel,
   userAwaitingCounterparty,
   userCanConfirmComplete,
 } from "@/lib/task-completion";
@@ -33,11 +33,7 @@ type TabKey = "history" | "reviews" | "settings";
 type HistoryFilter = "all" | "posted" | "accepted" | "completed";
 
 function statusLabel(task: Task) {
-  const label = taskCompletionLabel(task);
-  if (label === "done") return t("profile.statusDone");
-  if (label === "awaiting") return t("profile.statusAwaitingClose");
-  if (task.status === "ACCEPTED") return t("profile.statusAccepted");
-  return t("profile.statusOpen");
+  return getTaskStatusBadge(task);
 }
 
 function formatReviewDate(iso: string) {
@@ -66,6 +62,7 @@ function ProfileTaskRow({
   const normalizedPhone = normalizeRuPhone(phone) ?? phone;
   const asPublisher = isTaskPublisher(task, normalizedPhone);
   const asWorker = isTaskWorker(task, normalizedPhone);
+  const badge = statusLabel(task);
   const canComplete = userCanConfirmComplete(task, normalizedPhone) && onComplete;
   const awaitingCounterparty = userAwaitingCounterparty(task, normalizedPhone);
   const canReview = task.status === "DONE" && onReview;
@@ -76,7 +73,10 @@ function ProfileTaskRow({
         <div className="min-w-0 flex-1">
           <p className="truncate font-medium text-ink">{task.title}</p>
           <p className="mt-0.5 text-[14px] text-muted">
-            {task.timeLabel} · {statusLabel(task)}
+            {task.timeLabel}
+            <span className={`ml-2 inline-flex rounded-full px-2 py-0.5 text-[11px] font-semibold ${badge.className}`}>
+              {badge.text}
+            </span>
           </p>
         </div>
         <div className="shrink-0 text-right">

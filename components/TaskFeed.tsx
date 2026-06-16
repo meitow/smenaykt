@@ -127,7 +127,7 @@ export function TaskFeed({
           <EmptyState title={t(emptyTitleKey)} hint={t(emptyHintKey)} />
         </div>
       ) : (
-        <ul className="space-y-2.5">
+        <ul className="task-grid">
           {tasks.map((task, index) => (
             <li
               key={task.id}

@@ -56,7 +56,7 @@ export function BottomNav() {
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-20 border-t border-line/80 bg-surface/90 backdrop-blur-md">
-      <div className="relative mx-auto max-w-lg px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2">
+      <div className="relative app-shell px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2">
         {activeIndex >= 0 && (
           <div
             className="absolute top-2 h-12 rounded-2xl bg-brand-light/50 transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]"

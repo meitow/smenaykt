@@ -2,25 +2,13 @@
 
 import Link from "next/link";
 import type { Task } from "@/lib/types";
-import { taskCompletionLabel } from "@/lib/task-completion";
+import { getTaskStatusBadge } from "@/lib/task-status";
 import { formatHourlyRate } from "@/lib/pay";
 import { formatDuration } from "@/lib/task-filters";
 import { t } from "@/lib/i18n";
 
-function statusBadge(task: Task) {
-  const label = taskCompletionLabel(task);
-  if (label === "done") return { text: t("profile.statusDone"), className: "bg-taiga-light text-taiga-dark" };
-  if (label === "awaiting") return { text: t("profile.statusAwaitingClose"), className: "bg-page text-ink" };
-  if (task.status === "ACCEPTED") return { text: t("profile.statusAccepted"), className: "bg-brand-light text-brand-dark" };
-  return { text: t("profile.statusOpen"), className: "bg-page text-muted" };
-}
-
-type PartnerTaskCardProps = {
-  task: Task;
-};
-
 export function PartnerTaskCard({ task }: PartnerTaskCardProps) {
-  const badge = statusBadge(task);
+  const badge = getTaskStatusBadge(task);
   const workerPhone = task.workerPhone;
 
   return (

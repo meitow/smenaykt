@@ -81,7 +81,7 @@ export function AppHeader() {
   return (
     <header className="sticky top-0 z-20 border-b border-line/80 bg-surface/90 backdrop-blur-md">
       <div className="h-0.5 w-full bg-brand-gradient" aria-hidden />
-      <div className="mx-auto flex max-w-lg items-center gap-3 px-4 py-2.5">
+      <div className="app-shell flex items-center gap-3 px-4 py-2.5">
         <Link
           href="/profile"
           className={`flex min-w-0 flex-1 items-center gap-3 active:opacity-90 ${

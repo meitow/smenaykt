@@ -68,7 +68,7 @@ export default function PartnerDashboardPage() {
           </Link>
         </div>
       ) : (
-        <ul className="space-y-3">
+        <ul className="task-grid">
           {tasks.map((task) => (
             <li key={task.id}>
               <PartnerTaskCard task={task} />

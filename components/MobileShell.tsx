@@ -20,7 +20,7 @@ export function MobileShell({ children }: { children: React.ReactNode }) {
       <NotificationWatcher variant="mobile" />
       {!isDetail && (isPostForm ? <FormPageHeader title={t("personal.createTitle")} /> : <AppHeader />)}
       <main
-        className={`relative mx-auto max-w-lg ${
+        className={`app-shell relative ${
           isDetail ? "pb-0 pt-0" : isPostForm ? "px-4 pb-40 pt-2" : "px-4 pb-28 pt-1"
         }`}
       >

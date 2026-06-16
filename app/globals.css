@@ -50,6 +50,14 @@ body {
     @apply text-[22px] font-bold leading-tight tracking-tight text-ink;
   }
 
+  .app-shell {
+    @apply mx-auto w-full max-w-lg md:max-w-3xl lg:max-w-6xl;
+  }
+
+  .task-grid {
+    @apply grid gap-2.5 md:grid-cols-2 md:gap-3 lg:gap-4;
+  }
+
   .input-field {
     @apply mt-1.5 w-full rounded-xl border border-line bg-surface px-4 py-3 text-[17px] text-ink outline-none transition placeholder:text-muted focus:border-brand/50 focus:ring-2 focus:ring-brand/15;
   }

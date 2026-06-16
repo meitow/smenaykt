@@ -6,7 +6,7 @@ import { useCallback, useEffect, useState } from "react";
 import { PartnerShiftManage } from "@/components/partner/PartnerShiftManage";
 import { PartnerTaskActions } from "@/components/partner/PartnerTaskActions";
 import { WhatsAppShareButton } from "@/components/WhatsAppShareButton";
-import { taskCompletionLabel } from "@/lib/task-completion";
+import { getTaskStatusBadge } from "@/lib/task-status";
 import { formatRuPhone } from "@/lib/phone";
 import type { Task } from "@/lib/types";
 import { getPartnerInvite, partnerHeaders } from "@/lib/partner-session";
@@ -66,15 +66,7 @@ export default function PartnerTaskDetailPage() {
     );
   }
 
-  const statusKey = taskCompletionLabel(task);
-  const statusText =
-    statusKey === "done"
-      ? t("profile.statusDone")
-      : statusKey === "awaiting"
-        ? t("profile.statusAwaitingClose")
-        : task.status === "ACCEPTED"
-          ? t("profile.statusAccepted")
-          : t("profile.statusOpen");
+  const badge = getTaskStatusBadge(task);
 
   return (
     <div className="space-y-4">
@@ -92,8 +84,8 @@ export default function PartnerTaskDetailPage() {
             <p className="mt-1 text-[14px] text-muted">
               {task.place} · {t(`filters.category.${task.category}`)}
             </p>
-            <span className="mt-2 inline-block rounded-full bg-page px-2.5 py-1 text-[12px] font-semibold text-ink">
-              {statusText}
+            <span className={`mt-2 inline-block rounded-full px-2.5 py-1 text-[12px] font-semibold ${badge.className}`}>
+              {badge.text}
             </span>
           </div>
         </div>

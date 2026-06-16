@@ -1,6 +1,6 @@
-import { AppLogo } from "@/components/AppLogo";
 import { NotificationWatcher } from "@/components/NotificationWatcher";
 import { PartnerHeaderActions } from "@/components/partner/PartnerHeaderActions";
+import { PartnerLogoMenu } from "@/components/partner/PartnerLogoMenu";
 
 export default function PartnerLayout({
   children,
@@ -13,20 +13,12 @@ export default function PartnerLayout({
       <div className="ambient-blob -right-16 top-48 h-44 w-44 bg-taiga/15" aria-hidden />
       <NotificationWatcher variant="partner" />
       <header className="border-b border-black/5 bg-white">
-        <div className="mx-auto flex max-w-2xl items-center justify-between gap-4 px-4 py-4">
-          <div className="flex items-center gap-3">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-page">
-              <AppLogo size={44} />
-            </div>
-            <div>
-              <p className="text-lg font-bold text-ink">SmenaYKT Partner</p>
-              <p className="text-sm text-muted">Кабинет для предприятий · Якутск</p>
-            </div>
-          </div>
+        <div className="app-shell flex items-center justify-between gap-4 px-4 py-4">
+          <PartnerLogoMenu />
           <PartnerHeaderActions />
         </div>
       </header>
-      <main className="mx-auto max-w-2xl px-4 py-6">{children}</main>
+      <main className="app-shell px-4 py-6">{children}</main>
     </div>
   );
 }

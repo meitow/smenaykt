@@ -49,7 +49,7 @@ export function LoadingSkeleton({ count = 4, variant = "task" }: LoadingSkeleton
   const delays = ["stagger-1", "stagger-2", "stagger-3", "stagger-4", "stagger-5", "stagger-6"];
 
   return (
-    <div className="space-y-2.5" role="status" aria-label="Загрузка">
+    <div className="task-grid" role="status" aria-label="Загрузка">
       <div className="flex items-center justify-center gap-2 py-2">
         <span className="inline-flex gap-1">
           {[0, 1, 2].map((i) => (
