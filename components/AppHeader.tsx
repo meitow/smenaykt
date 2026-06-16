@@ -21,11 +21,7 @@ function resolveDisplayName(localName: string, serverName?: string): string {
 export function AppHeader() {
   const [displayName, setDisplayName] = useState(() => t("home.headerGuestName"));
   const [subtitle, setSubtitle] = useState(() => t("home.headerGuestHint"));
-  const [subtitleAction, setSubtitleAction] = useState(() => {
-    if (typeof window === "undefined") return false;
-    const phone = normalizeRuPhone(getUserPhone());
-    return !phone || !isValidRuPhone(phone);
-  });
+  const [subtitleAction, setSubtitleAction] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState("");
 
   const refreshSummary = useCallback(async () => {
