@@ -18,6 +18,8 @@ function dateValue(daysFromNow: number) {
 
 async function main() {
   await prisma.review.deleteMany();
+  await prisma.taskMessage.deleteMany();
+  await prisma.taskChatReadState.deleteMany();
   await prisma.task.deleteMany();
   await prisma.userProfile.deleteMany();
   await prisma.store.deleteMany();
@@ -46,6 +48,7 @@ async function main() {
     data: {
       name: "Предприятие (центр)",
       inviteCode: "YKT-DEMO-1",
+      accessToken: "yktDemoPartner0000001",
       phone: "+79990001122",
     },
   });
@@ -54,6 +57,7 @@ async function main() {
     data: {
       name: "Предприятие (мкр 203)",
       inviteCode: "YKT-DEMO-2",
+      accessToken: "yktDemoPartner0000002",
       phone: "+79990003344",
     },
   });

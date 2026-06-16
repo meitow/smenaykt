@@ -128,6 +128,14 @@ export default function PartnerTaskDetailPage() {
               {t("partner.viewProfile")}
             </Link>
           </div>
+          {(task.status === "ACCEPTED" || task.status === "DONE") && (
+            <Link
+              href={`/partner/tasks/${task.id}/chat`}
+              className="btn-soft mt-3 block text-center"
+            >
+              {t("chat.open")}
+            </Link>
+          )}
         </section>
       ) : (
         <section className="info-card px-4 py-4">

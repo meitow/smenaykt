@@ -8,12 +8,13 @@ datasource db {
 }
 
 model Store {
-  id         String   @id @default(cuid())
-  name       String
-  inviteCode String   @unique
-  phone      String
-  tasks      Task[]
-  createdAt  DateTime @default(now())
+  id          String   @id @default(cuid())
+  name        String
+  inviteCode  String   @unique
+  accessToken String   @unique
+  phone       String
+  tasks       Task[]
+  createdAt   DateTime @default(now())
 }
 
 model UserProfile {
@@ -51,6 +52,8 @@ model Task {
   hidden        Boolean   @default(false)
   createdAt     DateTime  @default(now())
   reviews       Review[]
+  messages      TaskMessage[]
+  chatReads     TaskChatReadState[]
 
   @@index([phone])
   @@index([workerPhone])
@@ -96,4 +99,28 @@ model ModeratorPhone {
   name      String   @default("")
   addedBy   String   @default("")
   createdAt DateTime @default(now())
+}
+
+model TaskMessage {
+  id         String   @id @default(cuid())
+  taskId     String
+  task       Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  senderType String   // user | partner
+  senderId   String
+  body       String
+  createdAt  DateTime @default(now())
+
+  @@index([taskId, createdAt])
+}
+
+model TaskChatReadState {
+  id              String   @id @default(cuid())
+  taskId          String
+  task            Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  participantType String   // user | partner
+  participantId   String
+  lastReadAt      DateTime @default(now())
+
+  @@unique([taskId, participantType, participantId])
+  @@index([participantType, participantId])
 }

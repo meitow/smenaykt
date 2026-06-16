@@ -16,7 +16,7 @@ export type NotificationRow = {
 export async function createNotification(input: {
   recipientPhone: string;
   taskId: string;
-  type: "counterparty_completed" | "task_closed";
+  type: "counterparty_completed" | "task_closed" | "chat_message";
   title: string;
   body: string;
 }) {

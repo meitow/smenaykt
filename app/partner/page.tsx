@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { PartnerTaskCard } from "@/components/partner/PartnerTaskCard";
-import { getPartnerInvite, getPartnerName, partnerHeaders, setPartnerSession } from "@/lib/partner-session";
+import { getPartnerName, getPartnerStoreId, getPartnerToken, partnerHeaders, setPartnerSession } from "@/lib/partner-session";
 import type { Task } from "@/lib/types";
 import { t } from "@/lib/i18n";
 
@@ -15,8 +15,8 @@ export default function PartnerDashboardPage() {
   const [loading, setLoading] = useState(true);
 
   const load = useCallback(() => {
-    const code = getPartnerInvite();
-    if (!code) {
+    const token = getPartnerToken();
+    if (!token) {
       router.replace("/partner/login");
       return;
     }
@@ -27,7 +27,12 @@ export default function PartnerDashboardPage() {
       .then((data) => {
         if (data.store?.name) {
           setStoreName(data.store.name);
-          setPartnerSession(code, data.store.name, data.store.phone ?? "");
+          setPartnerSession({
+            storeId: data.store.id ?? getPartnerStoreId() ?? "",
+            accessToken: token,
+            storeName: data.store.name,
+            storePhone: data.store.phone ?? "",
+          });
         }
         setTasks(data.tasks ?? []);
       })

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getStoreFromInvite, partnerInviteFromRequest } from "@/lib/partner-auth";
+import { resolvePartnerStoreFromRequest } from "@/lib/partner-auth";
 import { prisma } from "@/lib/prisma";
 import { toClientTask } from "@/lib/tasks";
 import { sanitizeEmoji } from "@/lib/emoji";
@@ -15,14 +15,9 @@ import {
 } from "@/lib/categories";
 
 export async function GET(request: NextRequest) {
-  const inviteCode = partnerInviteFromRequest(request);
-  if (!inviteCode) {
-    return NextResponse.json({ error: "Нужен код партнёра" }, { status: 401 });
-  }
-
-  const store = await getStoreFromInvite(inviteCode);
+  const store = await resolvePartnerStoreFromRequest(request);
   if (!store) {
-    return NextResponse.json({ error: "Неверный код" }, { status: 401 });
+    return NextResponse.json({ error: "Нужен ключ партнёра" }, { status: 401 });
   }
 
   const rows = await prisma.task.findMany({
@@ -38,11 +33,17 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   const body = await request.json();
-  const inviteCode = String(body.inviteCode ?? request.headers.get("x-invite-code") ?? "").trim();
-
-  const store = await getStoreFromInvite(inviteCode);
+  let store = await resolvePartnerStoreFromRequest(request);
   if (!store) {
-    return NextResponse.json({ error: "Неверный код партнёра" }, { status: 401 });
+    const bodyToken = String(body.accessToken ?? body.inviteCode ?? "").trim();
+    if (bodyToken) {
+      store = await resolvePartnerStoreFromRequest(
+        new Request(request.url, { headers: { "x-partner-token": bodyToken } })
+      );
+    }
+  }
+  if (!store) {
+    return NextResponse.json({ error: "Неверный ключ партнёра" }, { status: 401 });
   }
 
   const title = String(body.title ?? "").trim();

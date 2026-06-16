@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getPartnerTaskForStore, partnerInviteFromRequest } from "@/lib/partner-auth";
+import { getPartnerTaskFromRequest, resolvePartnerStoreFromRequest } from "@/lib/partner-auth";
 import { ensureUserProfile } from "@/lib/profile";
 import { prisma } from "@/lib/prisma";
 import { toClientTask } from "@/lib/tasks";
@@ -11,13 +11,13 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const inviteCode = partnerInviteFromRequest(request);
-    if (!inviteCode) {
-      return NextResponse.json({ error: "Нужен код партнёра" }, { status: 401 });
+    const store = await resolvePartnerStoreFromRequest(request);
+    if (!store) {
+      return NextResponse.json({ error: "Нужен ключ партнёра" }, { status: 401 });
     }
 
     const { id } = await params;
-    const result = await getPartnerTaskForStore(id, inviteCode);
+    const result = await getPartnerTaskFromRequest(request, id);
 
     if (!result) {
       return NextResponse.json({ error: "Смена не найдена" }, { status: 404 });

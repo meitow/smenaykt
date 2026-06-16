@@ -39,8 +39,7 @@ export function PartnerPostForm({ defaultPlace = "" }: PartnerPostFormProps) {
     e.preventDefault();
     if (submittingRef.current) return;
 
-    const inviteCode = getPartnerInvite();
-    if (!inviteCode) {
+    if (!getPartnerInvite()) {
       router.replace("/partner/login");
       return;
     }
@@ -70,7 +69,6 @@ export function PartnerPostForm({ defaultPlace = "" }: PartnerPostFormProps) {
           ...partnerHeaders(),
         },
         body: JSON.stringify({
-          inviteCode,
           title: form.get("title"),
           description: form.get("description"),
           pay: form.get("pay"),

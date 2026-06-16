@@ -307,6 +307,9 @@ export function TaskDetailActions({
               </button>
             )}
             {error && <p className="text-center text-[14px] text-rose-600">{error}</p>}
+            <Link href={`/tasks/${taskId}/chat`} className="btn-soft block text-center">
+              {t("chat.open")}
+            </Link>
             <a
               href={`tel:${isWorker ? publisherPhone : workerPhone ?? publisherPhone}`}
               className="btn-secondary block text-center"
@@ -336,6 +339,9 @@ export function TaskDetailActions({
                 {t("task.reviewPublisher")}
               </button>
             )}
+            <Link href={`/tasks/${taskId}/chat`} className="btn-soft block text-center">
+              {t("chat.open")}
+            </Link>
             <a href={`tel:${publisherPhone}`} className="btn-gradient block text-center">
               {t("task.callPublisher")}
             </a>
@@ -362,6 +368,9 @@ export function TaskDetailActions({
                 {t("task.reviewWorker")}
               </button>
             )}
+            <Link href={`/tasks/${taskId}/chat`} className="btn-soft block text-center">
+              {t("chat.open")}
+            </Link>
             <a href={`tel:${workerPhone}`} className="btn-gradient block text-center">
               {t("task.callWorker")}
             </a>
