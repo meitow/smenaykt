@@ -19,6 +19,7 @@ import {
 } from "@/lib/categories";
 import {
   TIME_FILTERS,
+  matchesTaskSearch,
   resolveWhenRange,
 } from "@/lib/task-filters";
 import { assertPhoneNotBanned } from "@/lib/ban-list";
@@ -35,6 +36,7 @@ export async function GET(request: NextRequest) {
     const when = params.get("when");
     const scheduledDate = params.get("scheduledDate");
     const durationHours = params.get("durationHours");
+    const q = params.get("q")?.trim() ?? "";
 
     const where: Record<string, unknown> = { status: "OPEN" };
 
@@ -67,6 +69,10 @@ export async function GET(request: NextRequest) {
       rows = rows.filter(
         (row) => resolveTaskDurationHours(row.timeLabel, row.durationHours) === durationFilter
       );
+    }
+
+    if (q) {
+      rows = rows.filter((row) => matchesTaskSearch(row, q));
     }
 
     return NextResponse.json(rows.map(toClientTask));

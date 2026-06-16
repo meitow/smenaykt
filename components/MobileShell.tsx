@@ -3,6 +3,7 @@
 import { usePathname } from "next/navigation";
 import { AppHeader } from "@/components/AppHeader";
 import { FormPageHeader } from "@/components/FormPageHeader";
+import { DesktopNav } from "@/components/DesktopNav";
 import { BottomNav } from "@/components/BottomNav";
 import { NotificationWatcher } from "@/components/NotificationWatcher";
 import { t } from "@/lib/i18n";
@@ -19,9 +20,14 @@ export function MobileShell({ children }: { children: React.ReactNode }) {
 
       <NotificationWatcher variant="mobile" />
       {!isDetail && (isPostForm ? <FormPageHeader title={t("personal.createTitle")} /> : <AppHeader />)}
+      {!isDetail && <DesktopNav />}
       <main
         className={`app-shell relative ${
-          isDetail ? "pb-0 pt-0" : isPostForm ? "px-4 pb-40 pt-2" : "px-4 pb-28 pt-1"
+          isDetail
+            ? "pb-0 pt-0"
+            : isPostForm
+              ? "px-4 pb-40 pt-2 md:pb-24"
+              : "px-4 pb-28 pt-1 md:pb-8"
         }`}
       >
         {children}

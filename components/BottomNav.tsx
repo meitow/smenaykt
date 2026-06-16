@@ -2,60 +2,19 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { NavTabIcon } from "@/components/nav/NavTabIcon";
+import { APP_NAV_TABS } from "@/lib/app-nav";
 import { t } from "@/lib/i18n";
-
-const tabs = [
-  { href: "/", label: t("nav.tasks"), icon: "tasks" },
-  { href: "/post", label: t("nav.post"), icon: "post" },
-  { href: "/profile", label: t("nav.profile"), icon: "profile" },
-] as const;
-
-function TabIcon({ icon, active }: { icon: string; active: boolean }) {
-  const color = active ? "text-brand" : "text-muted";
-
-  if (icon === "tasks") {
-    return (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" className={color} aria-hidden>
-        <rect x="4" y="4" width="16" height="16" rx="3" stroke="currentColor" strokeWidth="1.8" />
-        <path d="M8 10h8M8 14h5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-      </svg>
-    );
-  }
-
-  if (icon === "post") {
-    return (
-      <svg
-        width="22"
-        height="22"
-        viewBox="0 0 24 24"
-        fill="none"
-        className={active ? "text-taiga" : "text-muted"}
-        aria-hidden
-      >
-        <path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-      </svg>
-    );
-  }
-
-  return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" className={color} aria-hidden>
-      <circle cx="12" cy="8" r="3.5" stroke="currentColor" strokeWidth="1.8" />
-      <path
-        d="M5.5 19.5c0-3 3-5.5 6.5-5.5s6.5 2.5 6.5 5.5"
-        stroke="currentColor"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-      />
-    </svg>
-  );
-}
 
 export function BottomNav() {
   const pathname = usePathname();
-  const activeIndex = tabs.findIndex((tab) => tab.href === pathname);
+  const activeIndex = APP_NAV_TABS.findIndex((tab) => tab.href === pathname);
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-20 border-t border-line/80 bg-surface/90 backdrop-blur-md">
+    <nav
+      className="fixed bottom-0 left-0 right-0 z-20 border-t border-line/80 bg-surface/90 backdrop-blur-md md:hidden"
+      aria-label={t("nav.main")}
+    >
       <div className="relative app-shell px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2">
         {activeIndex >= 0 && (
           <div
@@ -68,7 +27,7 @@ export function BottomNav() {
           />
         )}
         <div className="relative flex items-center justify-around">
-          {tabs.map((tab) => {
+          {APP_NAV_TABS.map((tab) => {
             const active = pathname === tab.href;
             return (
               <Link
@@ -78,13 +37,13 @@ export function BottomNav() {
                   active ? "scale-100" : "opacity-80"
                 }`}
               >
-                <TabIcon icon={tab.icon} active={active} />
+                <NavTabIcon icon={tab.icon} active={active} />
                 <span
-                  className={`text-[11px] font-semibold transition-colors duration-200 ${
+                  className={`text-[12px] font-semibold transition-colors duration-200 ${
                     active ? "text-brand" : "text-muted"
                   }`}
                 >
-                  {tab.label}
+                  {t(tab.labelKey)}
                 </span>
               </Link>
             );

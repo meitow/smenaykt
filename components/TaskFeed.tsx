@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { EmptyState } from "@/components/EmptyState";
+import { HomeSidebar } from "@/components/HomeSidebar";
 import { HomeHero } from "@/components/HomeHero";
 import { LoadingSkeleton } from "@/components/LoadingSkeleton";
 import { SourceSegment } from "@/components/SourceSegment";
@@ -44,16 +45,24 @@ export function TaskFeed({
     }
     return base;
   });
+  const [searchQuery, setSearchQuery] = useState("");
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => setSearchQuery(filters.search.trim()), 350);
+    return () => window.clearTimeout(timer);
+  }, [filters.search]);
 
   const load = useCallback(async () => {
     setLoading(true);
     setLoadError("");
 
     try {
-      const res = await fetch(`/api/tasks${buildTasksQuery(filters)}`);
+      const res = await fetch(
+        `/api/tasks${buildTasksQuery({ ...filters, search: searchQuery })}`
+      );
 
       let data: unknown;
       try {
@@ -81,7 +90,7 @@ export function TaskFeed({
     } finally {
       setLoading(false);
     }
-  }, [filters]);
+  }, [filters, searchQuery]);
 
   useEffect(() => {
     load();
@@ -92,7 +101,8 @@ export function TaskFeed({
   }
 
   return (
-    <div className="space-y-3">
+    <div className={showHero ? "lg:grid lg:grid-cols-[minmax(0,1fr)_17rem] lg:items-start lg:gap-6" : ""}>
+      <div className="space-y-3 min-w-0">
       {showHero && (
         <HomeHero taskCount={loading ? undefined : tasks.length} loading={loading} />
       )}
@@ -139,6 +149,9 @@ export function TaskFeed({
           ))}
         </ul>
       )}
+      </div>
+
+      {showHero ? <HomeSidebar /> : null}
     </div>
   );
 }

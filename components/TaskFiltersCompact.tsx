@@ -101,6 +101,7 @@ export function TaskFiltersCompact({
   }
 
   const hasActiveFilters =
+    value.search.trim().length > 0 ||
     (!hideSourceFilter && value.source !== "all") ||
     value.category !== "all" ||
     value.when !== "all" ||
@@ -117,6 +118,18 @@ export function TaskFiltersCompact({
   return (
     <>
       <div className="space-y-2">
+        <label className="block">
+          <span className="sr-only">{t("filters.searchLabel")}</span>
+          <input
+            type="search"
+            value={value.search}
+            onChange={(e) => onChange({ ...value, search: e.target.value })}
+            placeholder={t("filters.searchPlaceholder")}
+            className="input-field !mt-0"
+            autoComplete="off"
+          />
+        </label>
+
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
           {triggers.map((item) => (
             <button

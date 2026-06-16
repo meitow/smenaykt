@@ -38,6 +38,7 @@ export type TaskListFilters = {
   when: TimeFilter;
   scheduledDate: string;
   durationHours: DurationHoursFilter;
+  search: string;
 };
 
 export const defaultTaskListFilters: TaskListFilters = {
@@ -46,6 +47,7 @@ export const defaultTaskListFilters: TaskListFilters = {
   when: "all",
   scheduledDate: "",
   durationHours: "all",
+  search: "",
 };
 
 
@@ -60,6 +62,8 @@ export function buildTasksQuery(filters: TaskListFilters): string {
     }
   }
   if (filters.durationHours !== "all") params.set("durationHours", filters.durationHours);
+  const search = filters.search.trim();
+  if (search) params.set("q", search);
   const qs = params.toString();
   return qs ? `?${qs}` : "";
 }
@@ -106,6 +110,13 @@ export function resolveWhenRange(
   }
 
   return null;
+}
+
+export function matchesTaskSearch(task: { title: string; description: string; place: string }, query: string) {
+  const q = query.trim().toLowerCase();
+  if (!q) return true;
+  const haystack = `${task.title} ${task.description} ${task.place}`.toLowerCase();
+  return haystack.includes(q);
 }
 
 export function formatDuration(hours: number): string {

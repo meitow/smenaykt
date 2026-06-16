@@ -40,10 +40,10 @@ export function TaskCard({ task }: TaskCardProps) {
               </p>
             </div>
             <div className="mt-1 flex items-center justify-between gap-2">
-              <p className="min-w-0 truncate text-[13px] text-muted">
+              <p className="min-w-0 truncate text-[14px] text-muted">
                 {publisher} · {task.place}
               </p>
-              <p className="shrink-0 text-[12px] font-medium leading-none text-muted">
+              <p className="shrink-0 text-[13px] font-medium leading-none text-muted">
                 {formatHourlyRate(task.pay, task.durationHours)}
               </p>
             </div>
@@ -54,7 +54,7 @@ export function TaskCard({ task }: TaskCardProps) {
 
         <div className="flex items-center justify-between gap-3 px-3 py-2">
           <p className="text-[14px] font-semibold leading-none text-ink">{task.timeLabel}</p>
-          <p className="text-[13px] leading-none text-muted">{formatDuration(task.durationHours)}</p>
+          <p className="text-[14px] leading-none text-muted">{formatDuration(task.durationHours)}</p>
         </div>
       </Link>
     </article>
