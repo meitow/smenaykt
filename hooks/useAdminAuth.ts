@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { getUserPhone } from "@/lib/user-session";
 
 const SECRET_KEY = "smenaykt_admin_secret";
@@ -10,6 +10,21 @@ export type AdminSession = {
   viaSecret: boolean;
   canManageModerators: boolean;
 };
+
+function readSecretFromUrl(): string {
+  if (typeof window === "undefined") return "";
+  return new URLSearchParams(window.location.search).get("secret")?.trim() ?? "";
+}
+
+function readPersistedSecret(): string {
+  if (typeof window === "undefined") return "";
+  const fromUrl = readSecretFromUrl();
+  if (fromUrl) {
+    sessionStorage.setItem(SECRET_KEY, fromUrl);
+    return fromUrl;
+  }
+  return sessionStorage.getItem(SECRET_KEY)?.trim() ?? "";
+}
 
 function sessionHeaders(secret: string, phone: string | null): HeadersInit {
   return {
@@ -23,38 +38,37 @@ export function useAdminAuth() {
   const [session, setSession] = useState<AdminSession | null>(null);
   const [secret, setSecret] = useState("");
   const [storedSecret, setStoredSecret] = useState("");
+  const [bootstrapped, setBootstrapped] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const refreshInFlight = useRef(false);
 
   useEffect(() => {
-    const saved = sessionStorage.getItem(SECRET_KEY)?.trim() ?? "";
-    const fromUrl =
-      typeof window !== "undefined"
-        ? new URLSearchParams(window.location.search).get("secret")?.trim() ?? ""
-        : "";
-    const initial = saved || fromUrl;
-    if (fromUrl) {
-      sessionStorage.setItem(SECRET_KEY, fromUrl);
-    }
-    if (initial) {
-      setStoredSecret(initial);
-      setSecret(initial);
-    }
+    const initial = readPersistedSecret();
+    setStoredSecret(initial);
+    setSecret(initial);
+    setBootstrapped(true);
   }, []);
 
+  const resolveSecret = useCallback(
+    (override?: string) => (override ?? (storedSecret || readPersistedSecret())).trim(),
+    [storedSecret]
+  );
+
   const authHeaders = useCallback((): HeadersInit => {
-    const phone = getUserPhone();
-    return sessionHeaders(storedSecret.trim(), phone);
-  }, [storedSecret]);
+    return sessionHeaders(resolveSecret(), getUserPhone());
+  }, [resolveSecret]);
 
   const refreshSession = useCallback(
     async (options?: { showError?: boolean; secretOverride?: string }) => {
+      if (refreshInFlight.current) return;
+      refreshInFlight.current = true;
       setLoading(true);
       if (options?.showError) {
         setError("");
       }
 
-      const activeSecret = (options?.secretOverride ?? storedSecret).trim();
+      const activeSecret = resolveSecret(options?.secretOverride);
       const phone = getUserPhone();
 
       try {
@@ -65,16 +79,19 @@ export function useAdminAuth() {
 
         if (!res.ok) {
           setSession(null);
-          if (activeSecret) {
+          if (options?.showError) {
             sessionStorage.removeItem(SECRET_KEY);
             setStoredSecret("");
-          }
-          if (options?.showError || activeSecret) {
             setError(data.error ?? "Неверный ключ доступа");
           } else {
             setError("");
           }
           return;
+        }
+
+        if (activeSecret) {
+          sessionStorage.setItem(SECRET_KEY, activeSecret);
+          setStoredSecret(activeSecret);
         }
 
         setSession({
@@ -89,21 +106,23 @@ export function useAdminAuth() {
           setError("Не удалось проверить доступ");
         }
       } finally {
+        refreshInFlight.current = false;
         setLoading(false);
       }
     },
-    [storedSecret]
+    [resolveSecret]
   );
 
   useEffect(() => {
+    if (!bootstrapped) return;
     void refreshSession();
-  }, [refreshSession]);
+    // Only auto-check once after reading URL / sessionStorage secret.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [bootstrapped]);
 
   async function unlockWithSecret() {
     const trimmed = secret.trim();
     if (!trimmed) return;
-    sessionStorage.setItem(SECRET_KEY, trimmed);
-    setStoredSecret(trimmed);
     await refreshSession({ showError: true, secretOverride: trimmed });
   }
 
@@ -112,6 +131,7 @@ export function useAdminAuth() {
     setStoredSecret("");
     setSecret("");
     setError("");
+    setSession(null);
     void refreshSession();
   }
 
