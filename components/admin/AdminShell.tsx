@@ -20,6 +20,7 @@ type AdminShellProps = {
   onTabChange: (tab: AdminTab) => void;
   sessionPhone: string | null;
   viaSecret: boolean;
+  onLogout: () => void;
   children: ReactNode;
 };
 
@@ -28,6 +29,7 @@ export function AdminShell({
   onTabChange,
   sessionPhone,
   viaSecret,
+  onLogout,
   children,
 }: AdminShellProps) {
   return (
@@ -44,9 +46,18 @@ export function AdminShell({
                   : t("admin.sessionUnknown")}
             </p>
           </div>
-          <Link href="/" className="shrink-0 text-[15px] font-medium text-brand">
-            {t("admin.backToApp")}
-          </Link>
+          <div className="flex shrink-0 items-center gap-4">
+            <button
+              type="button"
+              onClick={onLogout}
+              className="text-[15px] font-medium text-muted transition hover:text-rose-600"
+            >
+              {t("admin.lock")}
+            </button>
+            <Link href="/" className="text-[15px] font-medium text-brand">
+              {t("admin.backToApp")}
+            </Link>
+          </div>
         </div>
       </header>
 

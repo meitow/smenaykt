@@ -349,13 +349,8 @@ export function AdminDashboard({ initialTab }: { initialTab?: string }) {
       onTabChange={setTab}
       sessionPhone={auth.session.phone ? formatRuPhone(auth.session.phone) : auth.sessionPhone}
       viaSecret={auth.session.viaSecret}
+      onLogout={auth.lockSecret}
     >
-      <div className="mb-4 flex justify-end">
-        <button type="button" onClick={auth.lockSecret} className="text-[14px] font-medium text-muted">
-          {t("admin.lock")}
-        </button>
-      </div>
-
       {panelError && <p className="mb-4 text-[14px] text-rose-600">{panelError}</p>}
 
       {tab === "overview" && overview && (
