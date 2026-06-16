@@ -107,8 +107,6 @@ export function TaskFeed({
           filters={filters}
           onChange={handleFiltersChange}
           resultCount={loading ? undefined : tasks.length}
-          taskCount={loading ? undefined : tasks.length}
-          loading={loading}
         />
       ) : (
         <div className="animate-fade-in opacity-0" style={{ animationDelay: "80ms" }}>
