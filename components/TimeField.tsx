@@ -1,6 +1,7 @@
 "use client";
 
-import { useRef } from "react";
+import { useState } from "react";
+import { TimePickerSheet } from "@/components/TimePickerSheet";
 import { formatTimeHm } from "@/lib/datetime";
 import { t } from "@/lib/i18n";
 
@@ -10,6 +11,7 @@ type TimeFieldProps = {
   name?: string;
   required?: boolean;
   placeholder?: string;
+  title?: string;
 };
 
 export function TimeField({
@@ -18,24 +20,15 @@ export function TimeField({
   name,
   required,
   placeholder = t("post.timePlaceholder"),
+  title,
 }: TimeFieldProps) {
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  function openPicker() {
-    const input = inputRef.current;
-    if (!input) return;
-    if (typeof input.showPicker === "function") {
-      input.showPicker();
-      return;
-    }
-    input.click();
-  }
+  const [open, setOpen] = useState(false);
 
   return (
-    <div className="relative">
+    <>
       <button
         type="button"
-        onClick={openPicker}
+        onClick={() => setOpen(true)}
         className="input-field flex w-full items-center justify-between text-left"
       >
         <span className={value ? "font-medium tabular-nums text-ink" : "text-muted"}>
@@ -46,18 +39,17 @@ export function TimeField({
           <path d="M12 8v4l2.5 2.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
         </svg>
       </button>
-      <input
-        ref={inputRef}
-        type="time"
-        name={name}
-        required={required}
+      {name ? <input type="hidden" name={name} value={value} required={required} /> : null}
+      <TimePickerSheet
+        open={open}
         value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="pointer-events-none absolute h-0 w-0 opacity-0"
-        tabIndex={-1}
-        aria-hidden
-        lang="ru-RU"
+        title={title}
+        onClose={() => setOpen(false)}
+        onConfirm={(next) => {
+          onChange(next);
+          setOpen(false);
+        }}
       />
-    </div>
+    </>
   );
 }

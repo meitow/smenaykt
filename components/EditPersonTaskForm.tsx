@@ -181,11 +181,11 @@ export function EditPersonTaskForm({ task }: EditPersonTaskFormProps) {
             <div className="grid grid-cols-2 gap-3">
               <label className="block">
                 <span className="text-[15px] font-medium text-muted">{t("post.timeStartLabel")}</span>
-                <TimeField required value={timeStart} onChange={setTimeStart} />
+                <TimeField required value={timeStart} onChange={setTimeStart} title={t("post.timeStartLabel")} />
               </label>
               <label className="block">
                 <span className="text-[15px] font-medium text-muted">{t("post.timeEndLabel")}</span>
-                <TimeField required value={timeEnd} onChange={setTimeEnd} />
+                <TimeField required value={timeEnd} onChange={setTimeEnd} title={t("post.timeEndLabel")} />
               </label>
             </div>
           </div>

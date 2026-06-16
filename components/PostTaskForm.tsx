@@ -206,6 +206,7 @@ export function PostTaskForm() {
                     required
                     value={timeStart}
                     onChange={setTimeStart}
+                    title={t("post.timeStartLabel")}
                   />
                 </label>
                 <label className="block">
@@ -215,6 +216,7 @@ export function PostTaskForm() {
                     required
                     value={timeEnd}
                     onChange={setTimeEnd}
+                    title={t("post.timeEndLabel")}
                   />
                 </label>
               </div>

@@ -182,6 +182,8 @@
     "timeStartLabel": "Начало",
     "timeEndLabel": "Окончание",
     "timePlaceholder": "10:00",
+    "timePickerTitle": "Выберите время",
+    "timePickerHint": "24-часовой формат",
     "timeRangeInvalid": "Время окончания должно быть позже начала",
     "timeLabel": "Когда",
     "timeRequired": "Укажите дату",
