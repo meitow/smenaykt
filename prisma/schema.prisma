@@ -48,6 +48,7 @@ model Task {
   publisherCompletedAt DateTime?
   workerCompletedAt    DateTime?
   completedAt   DateTime?
+  hidden        Boolean   @default(false)
   createdAt     DateTime  @default(now())
   reviews       Review[]
 
@@ -87,5 +88,12 @@ model BannedPhone {
   phone     String   @id
   reason    String   @default("")
   bannedBy  String   @default("")
+  createdAt DateTime @default(now())
+}
+
+model ModeratorPhone {
+  phone     String   @id
+  name      String   @default("")
+  addedBy   String   @default("")
   createdAt DateTime @default(now())
 }

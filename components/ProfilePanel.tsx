@@ -174,6 +174,7 @@ export function ProfilePanel() {
   const [reviewSubmitting, setReviewSubmitting] = useState(false);
   const [reviewError, setReviewError] = useState("");
   const [error, setError] = useState("");
+  const [isModerator, setIsModerator] = useState(false);
 
   const loadProfile = useCallback(async (userPhone: string) => {
     if (!isValidRuPhone(userPhone)) {
@@ -261,6 +262,19 @@ export function ProfilePanel() {
       })
       .catch(() => undefined);
   }, []);
+
+  useEffect(() => {
+    if (!isValidRuPhone(savedPhone)) {
+      setIsModerator(false);
+      return;
+    }
+
+    fetch("/api/admin/session", {
+      headers: { "x-moderator-phone": savedPhone },
+    })
+      .then((res) => setIsModerator(res.ok))
+      .catch(() => setIsModerator(false));
+  }, [savedPhone]);
 
   useEffect(() => {
     if (isValidRuPhone(savedPhone)) {
@@ -874,6 +888,14 @@ export function ProfilePanel() {
               </a>
             </div>
           </div>
+
+          {isModerator && (
+            <div className="mt-5 border-t border-line pt-5">
+              <Link href="/admin" className="btn-outline w-full text-center">
+                {t("admin.openModeration")}
+              </Link>
+            </div>
+          )}
 
           {isValidRuPhone(savedPhone) && (
             <div className="mt-8 border-t border-line pt-6 text-center">

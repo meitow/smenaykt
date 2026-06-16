@@ -34,7 +34,7 @@ export function toClientTask(row: DbTask): Task {
 export async function listTasks(filters: TaskListFilters = defaultTaskListFilters) {
   const { prisma } = await import("@/lib/prisma");
 
-  const where: Record<string, unknown> = { status: "OPEN" };
+  const where: Record<string, unknown> = { status: "OPEN", hidden: false };
 
   if (filters.source === "person" || filters.source === "partner") {
     where.source = filters.source;
@@ -69,5 +69,6 @@ export async function listTasks(filters: TaskListFilters = defaultTaskListFilter
 export async function getTaskById(id: string) {
   const { prisma } = await import("@/lib/prisma");
   const row = await prisma.task.findUnique({ where: { id } });
-  return row ? toClientTask(row) : null;
+  if (!row || row.hidden) return null;
+  return toClientTask(row);
 }

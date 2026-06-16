@@ -1,14 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import { banPhone, listBannedPhones, unbanPhone } from "@/lib/ban-list";
-import { isAdminAuthorized } from "@/lib/admin-auth";
+import { resolveAdminActor } from "@/lib/admin-auth";
 import { isValidRuPhone, normalizeRuPhone } from "@/lib/phone";
 
 function unauthorized() {
   return NextResponse.json({ error: "Нет доступа" }, { status: 401 });
 }
 
+async function requireAdmin(request: NextRequest) {
+  const actor = await resolveAdminActor(request);
+  if (!actor) return null;
+  return actor;
+}
+
 export async function GET(request: NextRequest) {
-  if (!isAdminAuthorized(request)) {
+  if (!(await requireAdmin(request))) {
     return unauthorized();
   }
 
@@ -22,7 +28,8 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  if (!isAdminAuthorized(request)) {
+  const actor = await requireAdmin(request);
+  if (!actor) {
     return unauthorized();
   }
 
@@ -30,7 +37,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const phone = String(body.phone ?? "").trim();
     const reason = String(body.reason ?? "").trim();
-    const bannedBy = String(body.bannedBy ?? "").trim();
+    const bannedBy = String(body.bannedBy ?? "").trim() || actor.phone || "moderator";
 
     if (!isValidRuPhone(phone)) {
       return NextResponse.json({ error: "Укажите корректный телефон" }, { status: 400 });
@@ -45,7 +52,7 @@ export async function POST(request: NextRequest) {
 }
 
 export async function DELETE(request: NextRequest) {
-  if (!isAdminAuthorized(request)) {
+  if (!(await requireAdmin(request))) {
     return unauthorized();
   }
 
