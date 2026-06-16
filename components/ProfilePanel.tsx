@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { DetailSheet } from "@/components/DetailSheet";
 import { ProfileHero, ProfileStatsGrid } from "@/components/profile/ProfileHero";
+import { ProfileMenuNav, type ProfileSectionKey } from "@/components/profile/ProfileMenuNav";
 import { ProfilePhoneField } from "@/components/TaskDetailActions";
 import { StarRating } from "@/components/StarRating";
 import { isValidRuPhone, normalizeRuPhone } from "@/lib/phone";
@@ -18,18 +19,22 @@ import type { ProfileData, ProfilePendingReview, ProfileReview, Task } from "@/l
 import { legalDocPath } from "@/lib/legal";
 import { SUPPORT_TELEGRAM_URL, supportMailtoUrl } from "@/lib/support";
 import {
+  anketaCompletionPercent,
+  contactsCompletionPercent,
+  isProfileIncomplete,
+  profileCompletionPercent,
+} from "@/lib/profile-completion";
+import {
   clearUserSession,
   getUserAvatarUrl,
   getUserDisplayName,
   getUserPhone,
-  profileCompletionPercent,
   setUserAvatarUrl,
   setUserDisplayName,
   setUserPhone,
 } from "@/lib/user-session";
 import { t } from "@/lib/i18n";
 
-type TabKey = "history" | "reviews" | "settings";
 type HistoryFilter = "all" | "posted" | "accepted" | "completed";
 
 function statusLabel(task: Task) {
@@ -144,7 +149,7 @@ function ReviewCard({ review }: { review: ProfileReview }) {
 }
 
 export function ProfilePanel() {
-  const [tab, setTab] = useState<TabKey>("history");
+  const [section, setSection] = useState<ProfileSectionKey | null>(null);
   const [historyFilter, setHistoryFilter] = useState<HistoryFilter>("all");
 
   const [savedPhone, setSavedPhone] = useState("");
@@ -294,12 +299,6 @@ export function ProfilePanel() {
       cancelled = true;
     };
   }, [phone, savedPhone]);
-
-  const hasUnsavedChanges =
-    name !== savedName ||
-    phone !== savedPhone ||
-    bio !== savedBio ||
-    (avatarUrl ?? "") !== (savedAvatarUrl ?? "");
 
   const pendingReviewIds = useMemo(
     () => new Set(profile?.pendingReviews.map((item) => item.taskId) ?? []),
@@ -511,7 +510,7 @@ export function ProfilePanel() {
       setReviewComment("");
       setReviewRating(5);
       await loadProfile(savedPhone);
-      setTab("reviews");
+      setSection("reviews");
     } catch {
       setReviewError(t("profile.reviewError"));
     } finally {
@@ -521,17 +520,81 @@ export function ProfilePanel() {
 
   const displayName = savedName.trim() || t("profile.guest");
   const stats = profile?.stats;
+  const draftActive = section === "anketa" || section === "contacts";
+  const completionName = draftActive && section === "anketa" ? name : savedName;
+  const completionPhone = draftActive && section === "contacts" ? phone : savedPhone;
+  const completionAvatar =
+    draftActive && section === "anketa" ? avatarUrl : savedAvatarUrl;
+  const completionBio = draftActive && section === "anketa" ? bio : savedBio;
   const completion = profileCompletionPercent(
-    tab === "settings" ? name : savedName,
-    tab === "settings" ? phone : savedPhone,
-    (tab === "settings" ? avatarUrl : savedAvatarUrl) ?? undefined,
-    tab === "settings" ? bio : savedBio
+    completionName,
+    completionPhone,
+    completionAvatar ?? undefined,
+    completionBio
+  );
+  const anketaCompletion = anketaCompletionPercent(
+    completionName,
+    completionAvatar ?? undefined,
+    completionBio
+  );
+  const contactsCompletion = contactsCompletionPercent(completionPhone);
+  const profileIncomplete = isProfileIncomplete(
+    savedName,
+    savedPhone,
+    savedAvatarUrl ?? undefined,
+    savedBio
   );
 
-  const tabs: { key: TabKey; label: string }[] = [
-    { key: "history", label: t("profile.tabHistory") },
-    { key: "reviews", label: t("profile.tabReviews") },
-    { key: "settings", label: t("profile.tabSettings") },
+  const anketaUnsaved =
+    name !== savedName || bio !== savedBio || (avatarUrl ?? "") !== (savedAvatarUrl ?? "");
+  const contactsUnsaved = phone !== savedPhone;
+
+  useEffect(() => {
+    if (section !== null) return;
+    if (isProfileIncomplete(savedName, savedPhone, savedAvatarUrl ?? undefined, savedBio)) {
+      setSection("anketa");
+    }
+  }, [section, savedName, savedPhone, savedAvatarUrl, savedBio]);
+
+  const menuItems = [
+    {
+      key: "anketa" as const,
+      emoji: "👤",
+      title: t("profile.menuAnketa"),
+      subtitle:
+        anketaCompletion >= 100
+          ? t("profile.menuAnketaHint", { percent: 100 })
+          : anketaCompletion > 0
+            ? t("profile.menuAnketaHint", { percent: anketaCompletion })
+            : t("profile.menuAnketaIncomplete"),
+      alert: anketaCompletion < 100,
+    },
+    {
+      key: "contacts" as const,
+      emoji: "📞",
+      title: t("profile.menuContacts"),
+      subtitle:
+        contactsCompletion >= 100 ? t("profile.menuContactsDone") : t("profile.menuContactsCheck"),
+      alert: contactsCompletion < 100,
+    },
+    {
+      key: "history" as const,
+      emoji: "📜",
+      title: t("profile.menuHistory"),
+      subtitle: stats
+        ? t("profile.filterCompleted") + `: ${stats.completedTotal}`
+        : t("profile.filterAll"),
+      alert: false,
+    },
+    {
+      key: "reviews" as const,
+      emoji: "⭐",
+      title: t("profile.menuReviews"),
+      subtitle: stats?.reviewCount
+        ? t("profile.reviewsTitle") + ` · ${stats.reviewCount}`
+        : t("profile.noReviews"),
+      alert: false,
+    },
   ];
 
   const historyFilters: { key: HistoryFilter; label: string }[] = [
@@ -552,7 +615,19 @@ export function ProfilePanel() {
         reviewCount={stats?.reviewCount ?? 0}
         uploading={uploading}
         onAvatarPick={onAvatarPick}
+        completionPercent={completion}
       />
+
+      {completion < 100 && (
+        <button
+          type="button"
+          onClick={() => setSection("anketa")}
+          className="w-full rounded-2xl bg-gradient-to-r from-brand to-taiga px-4 py-3.5 text-left text-white shadow-card transition active:scale-[0.99]"
+        >
+          <p className="text-[16px] font-bold">{t("profile.verifyIdentity")}</p>
+          <p className="mt-0.5 text-[13px] text-white/90">{t("profile.verifyIdentityHint")}</p>
+        </button>
+      )}
 
       {stats && (
         <ProfileStatsGrid
@@ -588,24 +663,11 @@ export function ProfilePanel() {
         </section>
       )}
 
-      <div className="flex gap-2 overflow-x-auto pb-1">
-        {tabs.map((item) => (
-          <button
-            key={item.key}
-            type="button"
-            onClick={() => setTab(item.key)}
-            className={`shrink-0 rounded-full px-4 py-2 text-[14px] font-semibold transition ${
-              tab === item.key ? "bg-brand text-white shadow-soft" : "bg-surface text-muted ring-1 ring-black/[0.05]"
-            }`}
-          >
-            {item.label}
-          </button>
-        ))}
-      </div>
+      <ProfileMenuNav items={menuItems} activeKey={section} onSelect={setSection} />
 
       {error && <p className="text-center text-[14px] text-rose-600">{error}</p>}
 
-      {tab === "history" && (
+      {section === "history" && (
         <section className="info-card">
           <div className="flex gap-2 overflow-x-auto px-4 pt-4 scrollbar-none [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
             {historyFilters.map((item) => (
@@ -627,7 +689,16 @@ export function ProfilePanel() {
           ) : !isValidRuPhone(savedPhone) ? (
             <p className="px-4 py-4 text-[14px] text-muted">{t("profile.phoneRequired")}</p>
           ) : historyItems.length === 0 ? (
-            <p className="px-4 py-4 text-[14px] text-muted">{t("profile.noHistory")}</p>
+            <div className="px-4 py-6 text-center">
+              <p className="text-[14px] text-muted">
+                {profileIncomplete ? t("profile.historyEmptyIncomplete") : t("profile.noHistory")}
+              </p>
+              {profileIncomplete && (
+                <button type="button" onClick={() => setSection("anketa")} className="btn-soft mt-4 !py-2.5">
+                  {t("profile.fillAnketa")}
+                </button>
+              )}
+            </div>
           ) : (
             <ul className="mt-2 divide-y divide-line">
               {historyItems.map((task) => (
@@ -654,13 +725,22 @@ export function ProfilePanel() {
         </section>
       )}
 
-      {tab === "reviews" && (
+      {section === "reviews" && (
         <section className="info-card">
           <h2 className="px-4 pt-4 text-[15px] font-semibold text-ink">{t("profile.reviewsTitle")}</h2>
           {loading && isValidRuPhone(savedPhone) ? (
             <p className="px-4 py-4 text-[14px] text-muted">{t("profile.loadingTasks")}</p>
           ) : !profile?.reviews.length ? (
-            <p className="px-4 py-4 text-[14px] text-muted">{t("profile.noReviews")}</p>
+            <div className="px-4 py-6 text-center">
+              <p className="text-[14px] text-muted">
+                {profileIncomplete ? t("profile.reviewsEmptyIncomplete") : t("profile.noReviews")}
+              </p>
+              {profileIncomplete && (
+                <button type="button" onClick={() => setSection("anketa")} className="btn-soft mt-4 !py-2.5">
+                  {t("profile.fillAnketa")}
+                </button>
+              )}
+            </div>
           ) : (
             <>
             <p className="px-4 pb-1 text-[13px] text-muted">{t("profile.reviewsVerifiedHint")}</p>
@@ -674,7 +754,7 @@ export function ProfilePanel() {
         </section>
       )}
 
-      {tab === "settings" && (
+      {section === "anketa" && (
         <section className="info-card p-5">
           <label className="block">
             <span className="text-[15px] font-medium text-muted">{t("profile.nameLabel")}</span>
@@ -686,8 +766,6 @@ export function ProfilePanel() {
               maxLength={32}
             />
           </label>
-
-          <ProfilePhoneField value={phone} onChange={onPhoneChange} />
 
           <label className="mt-4 block text-left">
             <span className="text-[15px] font-medium text-muted">{t("profile.bioLabel")}</span>
@@ -702,31 +780,53 @@ export function ProfilePanel() {
             <p className="mt-1 text-[13px] text-muted">{t("profile.bioHint")}</p>
           </label>
 
-          <div className="mt-5">
-            <div className="flex items-center justify-between text-[15px]">
-              <span className="font-medium text-ink">{t("profile.completion")}</span>
-              <span className="font-semibold text-ink">{completion}%</span>
+          <p className="mt-4 text-[13px] text-muted">{t("profile.photoHint")}</p>
+
+          {anketaUnsaved && (
+            <p className="mt-3 text-[13px] font-medium text-brand">{t("profile.unsavedHint")}</p>
+          )}
+          {saveSuccess && (
+            <p className="mt-2 text-[13px] font-medium text-taiga">{t("profile.saveSuccess")}</p>
+          )}
+
+          {anketaUnsaved && (
+            <div className="mt-4 flex gap-2">
+              <button type="button" onClick={syncDraftFromSaved} className="btn-secondary flex-1 !py-3">
+                {t("profile.cancelChanges")}
+              </button>
+              <button
+                type="button"
+                onClick={saveChanges}
+                disabled={saving || !isValidRuPhone(phone)}
+                className="btn-gradient flex-1 disabled:opacity-50"
+              >
+                {saving ? t("profile.saving") : t("profile.saveChanges")}
+              </button>
             </div>
-            <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-page">
-              <div
-                className="h-full rounded-full bg-ink transition-all duration-300"
-                style={{ width: `${completion}%` }}
-              />
-            </div>
-            <p className="mt-2 text-[13px] text-muted">{t("profile.completionHint")}</p>
+          )}
+        </section>
+      )}
+
+      {section === "contacts" && (
+        <section className="info-card p-5">
+          <ProfilePhoneField value={phone} onChange={onPhoneChange} />
+
+          <div className="mt-5 rounded-xl bg-page px-4 py-3.5">
+            <p className="text-[15px] font-semibold text-ink">{t("profile.documentsTitle")}</p>
+            <p className="mt-1 text-[14px] leading-snug text-muted">{t("profile.documentsHint")}</p>
           </div>
 
-          {hasUnsavedChanges && phone !== savedPhone && isValidRuPhone(phone) && (
+          {contactsUnsaved && phone !== savedPhone && isValidRuPhone(phone) && (
             <p className="mt-4 text-[13px] text-muted">{t("profile.accountSwitchHint")}</p>
           )}
-          {hasUnsavedChanges && (
+          {contactsUnsaved && (
             <p className="mt-2 text-[13px] font-medium text-brand">{t("profile.unsavedHint")}</p>
           )}
           {saveSuccess && (
             <p className="mt-2 text-[13px] font-medium text-taiga">{t("profile.saveSuccess")}</p>
           )}
 
-          {hasUnsavedChanges && (
+          {contactsUnsaved && (
             <div className="mt-4 flex gap-2">
               <button type="button" onClick={syncDraftFromSaved} className="btn-secondary flex-1 !py-3">
                 {t("profile.cancelChanges")}

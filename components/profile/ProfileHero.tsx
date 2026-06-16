@@ -16,6 +16,7 @@ type ProfileHeroProps = {
   uploading: boolean;
   onAvatarPick: (file: File) => void;
   editable?: boolean;
+  completionPercent?: number;
 };
 
 function formatMemberSince(iso: string) {
@@ -37,6 +38,7 @@ export function ProfileHero({
   uploading,
   onAvatarPick,
   editable = true,
+  completionPercent,
 }: ProfileHeroProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [dragOver, setDragOver] = useState(false);
@@ -97,6 +99,24 @@ export function ProfileHero({
 
         <h2 className="mt-4 text-[20px] font-bold text-ink">{name}</h2>
         {phone && <p className="mt-1 text-[15px] text-muted">{formatRuPhone(phone)}</p>}
+
+        {typeof completionPercent === "number" && completionPercent < 100 && (
+          <div className="mt-4 w-full text-left">
+            <div className="flex items-center justify-between gap-2 text-[13px]">
+              <span className="font-medium text-ink">{t("profile.completion")}</span>
+              <span className="font-bold tabular-nums text-brand">{completionPercent}%</span>
+            </div>
+            <div className="mt-2 h-2 overflow-hidden rounded-full bg-page">
+              <div
+                className="h-full rounded-full bg-gradient-to-r from-brand to-taiga transition-all duration-500"
+                style={{ width: `${completionPercent}%` }}
+              />
+            </div>
+            <p className="mt-2 text-[13px] leading-snug text-muted">
+              {t("profile.progressMotivation", { percent: completionPercent })}
+            </p>
+          </div>
+        )}
 
         <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
           <ProfileRatingBadge avgRating={avgRating} reviewCount={reviewCount} />
