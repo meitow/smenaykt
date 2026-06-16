@@ -19,7 +19,7 @@ export function MobileTaskChatPage({ taskId, taskTitle }: MobileTaskChatPageProp
     <TaskChatPanel
       taskId={taskId}
       taskTitle={taskTitle}
-      backHref={`/tasks/${taskId}`}
+      backFallbackHref={`/tasks/${taskId}`}
       authHeaders={authHeaders}
     />
   );

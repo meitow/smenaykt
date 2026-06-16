@@ -3,18 +3,24 @@
 import { useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { AppHeader } from "@/components/AppHeader";
-import { FormPageHeader } from "@/components/FormPageHeader";
+import { PageHeaderWithBack } from "@/components/PageHeaderWithBack";
 import { DesktopNav } from "@/components/DesktopNav";
 import { BottomNav } from "@/components/BottomNav";
 import { NotificationWatcher } from "@/components/NotificationWatcher";
 import { isMobileTaskChatPath, isMobileTaskDetailPath } from "@/lib/route-patterns";
 import { t } from "@/lib/i18n";
 
+const TAB_BACK_HEADERS: Record<string, string> = {
+  "/chats": "chat.inboxTitle",
+  "/profile": "nav.profile",
+  "/post": "personal.createTitle",
+};
+
 export function MobileShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const isTaskChat = isMobileTaskChatPath(pathname);
   const isDetail = isMobileTaskDetailPath(pathname);
-  const isPostForm = pathname === "/post";
+  const tabBackTitleKey = TAB_BACK_HEADERS[pathname];
 
   useEffect(() => {
     if (!isTaskChat) return;
@@ -47,15 +53,22 @@ export function MobileShell({ children }: { children: React.ReactNode }) {
       <div className="ambient-blob -right-12 top-64 h-40 w-40 bg-taiga/20" aria-hidden />
 
       <NotificationWatcher variant="mobile" />
-      {!isDetail && (isPostForm ? <FormPageHeader title={t("personal.createTitle")} /> : <AppHeader />)}
+      {!isDetail &&
+        (tabBackTitleKey ? (
+          <PageHeaderWithBack title={t(tabBackTitleKey)} />
+        ) : (
+          <AppHeader />
+        ))}
       {!isDetail && <DesktopNav />}
       <main
         className={`app-shell relative ${
           isDetail
             ? "pb-0 pt-0"
-            : isPostForm
+            : pathname === "/post"
               ? "px-4 pb-40 pt-2 md:pb-24"
-              : "px-4 pb-28 pt-1 md:pb-8"
+              : tabBackTitleKey
+                ? "px-4 pb-28 pt-2 md:pb-8"
+                : "px-4 pb-28 pt-1 md:pb-8"
         }`}
       >
         {children}

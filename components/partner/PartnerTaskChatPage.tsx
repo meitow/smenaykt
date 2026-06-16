@@ -16,7 +16,7 @@ export function PartnerTaskChatPage({ taskId, taskTitle }: PartnerTaskChatPagePr
     <TaskChatPanel
       taskId={taskId}
       taskTitle={taskTitle}
-      backHref={`/partner/tasks/${taskId}`}
+      backFallbackHref={`/partner/tasks/${taskId}`}
       authHeaders={authHeaders}
     />
   );

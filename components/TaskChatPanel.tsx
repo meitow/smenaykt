@@ -1,14 +1,14 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import Link from "next/link";
+import { BackButton } from "@/components/BackButton";
 import type { ChatMessageView } from "@/lib/chat";
 import { t } from "@/lib/i18n";
 
 type TaskChatPanelProps = {
   taskId: string;
   taskTitle: string;
-  backHref: string;
+  backFallbackHref: string;
   authHeaders: () => HeadersInit;
 };
 
@@ -25,7 +25,7 @@ function formatTime(iso: string) {
   }
 }
 
-export function TaskChatPanel({ taskId, taskTitle, backHref, authHeaders }: TaskChatPanelProps) {
+export function TaskChatPanel({ taskId, taskTitle, backFallbackHref, authHeaders }: TaskChatPanelProps) {
   const [messages, setMessages] = useState<ChatMessageView[]>([]);
   const [draft, setDraft] = useState("");
   const [canSend, setCanSend] = useState(false);
@@ -116,11 +116,7 @@ export function TaskChatPanel({ taskId, taskTitle, backHref, authHeaders }: Task
     <div className="flex h-full min-h-0 flex-col overflow-hidden bg-page">
       <header className="shrink-0 border-b border-line bg-surface px-4 pb-3 pt-[max(0.75rem,env(safe-area-inset-top))]">
         <div className="flex items-center gap-3">
-          <Link href={backHref} className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-page" aria-label={t("task.backToList")}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
-              <path d="M14 6L8 12l6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </Link>
+          <BackButton fallbackHref={backFallbackHref} />
           <div className="min-w-0 flex-1">
             <p className="truncate text-[16px] font-bold text-ink">{taskTitle}</p>
             <p className="truncate text-[13px] text-muted">{t("chat.subtitle")}</p>
