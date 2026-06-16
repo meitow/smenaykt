@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { CalendarIcon, ClockIcon } from "@/components/InfoRow";
 import { DetailSheet } from "@/components/DetailSheet";
@@ -29,10 +29,29 @@ function descriptionLines(text: string) {
 
 export function TaskDetailView({ task }: TaskDetailViewProps) {
   const [sheet, setSheet] = useState<SheetKey>(null);
+  const footerRef = useRef<HTMLDivElement>(null);
+  const [footerPad, setFooterPad] = useState(220);
   const isPartner = task.source === "partner";
   const lines = task.description ? descriptionLines(task.description) : [];
   const hourlyRate = Math.round(task.pay / Math.max(task.durationHours, 1));
   const mapUrl = build2GisPlaceUrl(task.place, t("brand.city"));
+
+  useEffect(() => {
+    const node = footerRef.current;
+    if (!node) return;
+
+    const update = () => setFooterPad(node.offsetHeight + 16);
+    update();
+
+    const observer = new ResizeObserver(update);
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [
+    task.status,
+    task.workerPhone,
+    task.publisherCompletedAt,
+    task.workerCompletedAt,
+  ]);
 
   const payValueClass = "text-[22px] font-extrabold tabular-nums tracking-tight text-pay";
 
@@ -67,7 +86,10 @@ export function TaskDetailView({ task }: TaskDetailViewProps) {
         </div>
       </div>
 
-      <div className="px-4 pb-[calc(11.5rem+env(safe-area-inset-bottom))] pt-4">
+      <div
+        className="px-4 pt-4"
+        style={{ paddingBottom: `calc(${footerPad}px + env(safe-area-inset-bottom))` }}
+      >
         <div className="flex flex-wrap gap-2">
           <span className={`rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${isPartner ? "badge-partner" : "badge-person"}`}>
             {t(`filters.category.${task.category}`)}
@@ -150,7 +172,10 @@ export function TaskDetailView({ task }: TaskDetailViewProps) {
         </div>
       </div>
 
-      <div className="fixed bottom-0 left-0 right-0 z-10 border-t border-line bg-surface px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+      <div
+        ref={footerRef}
+        className="fixed bottom-0 left-0 right-0 z-10 border-t border-line bg-surface px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]"
+      >
         <TaskDetailActions
           taskId={task.id}
           taskTitle={task.title}

@@ -27,6 +27,19 @@ export function NavTabIcon({ icon, active }: { icon: AppNavIcon; active: boolean
     );
   }
 
+  if (icon === "chats") {
+    return (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className={color} aria-hidden>
+        <path
+          d="M5 18.5V7.8A2.8 2.8 0 0 1 7.8 5h8.4A2.8 2.8 0 0 1 19 7.8v5.4A2.8 2.8 0 0 1 16.2 16H9l-4 2.5z"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinejoin="round"
+        />
+      </svg>
+    );
+  }
+
   return (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className={color} aria-hidden>
       <circle cx="12" cy="8" r="3.5" stroke="currentColor" strokeWidth="1.8" />
