@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { isValidRuPhone } from "@/lib/phone";
 import { getUserPhone } from "@/lib/user-session";
 
 const SECRET_KEY = "smenaykt_admin_secret";
@@ -25,6 +26,25 @@ function stripSecretFromUrl() {
   url.searchParams.delete("secret");
   const next = `${url.pathname}${url.search}${url.hash}`;
   window.history.replaceState({}, "", next);
+}
+
+function stripFromProfileFromUrl() {
+  if (typeof window === "undefined") return;
+  const url = new URL(window.location.href);
+  if (!url.searchParams.has("from")) return;
+  url.searchParams.delete("from");
+  const next = `${url.pathname}${url.search}${url.hash}`;
+  window.history.replaceState({}, "", next);
+}
+
+function readFromProfile(): boolean {
+  if (typeof window === "undefined") return false;
+  return new URLSearchParams(window.location.search).get("from") === "profile";
+}
+
+function hasModeratorPhone(): boolean {
+  const phone = getUserPhone();
+  return Boolean(phone && isValidRuPhone(phone));
 }
 
 function isPanelDismissed() {
@@ -80,9 +100,13 @@ export function useAdminAuth() {
   const refreshInFlight = useRef(false);
 
   useEffect(() => {
+    if (readFromProfile()) {
+      sessionStorage.removeItem(DISMISSED_KEY);
+      stripFromProfileFromUrl();
+    }
+
     if (isPanelDismissed()) {
       setBootstrapped(true);
-      setLoading(false);
       return;
     }
     const fromUrl = readSecretFromUrl();
@@ -100,7 +124,12 @@ export function useAdminAuth() {
     async (options?: { showError?: boolean; secretOverride?: string; force?: boolean }) => {
       if (refreshInFlight.current) return;
 
-      if (!options?.force && isPanelDismissed() && !options?.secretOverride) {
+      if (
+        !options?.force &&
+        isPanelDismissed() &&
+        !options?.secretOverride &&
+        !hasModeratorPhone()
+      ) {
         setSession(null);
         setLoading(false);
         return;
