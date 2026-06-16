@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { getUserPhone } from "@/lib/user-session";
 
 const SECRET_KEY = "smenaykt_admin_secret";
+const DISMISSED_KEY = "smenaykt_admin_dismissed";
 
 export type AdminSession = {
   phone: string | null;
@@ -16,8 +17,25 @@ function readSecretFromUrl(): string {
   return new URLSearchParams(window.location.search).get("secret")?.trim() ?? "";
 }
 
+function stripSecretFromUrl() {
+  if (typeof window === "undefined") return;
+  const url = new URL(window.location.href);
+  if (!url.searchParams.has("secret")) return;
+  url.searchParams.delete("secret");
+  const next = `${url.pathname}${url.search}${url.hash}`;
+  window.history.replaceState({}, "", next);
+}
+
+function isPanelDismissed() {
+  if (typeof window === "undefined") return false;
+  return sessionStorage.getItem(DISMISSED_KEY) === "1";
+}
+
 function readPersistedSecret(): string {
   if (typeof window === "undefined") return "";
+  if (isPanelDismissed()) {
+    return "";
+  }
   const fromUrl = readSecretFromUrl();
   if (fromUrl) {
     sessionStorage.setItem(SECRET_KEY, fromUrl);
@@ -44,6 +62,11 @@ export function useAdminAuth() {
   const refreshInFlight = useRef(false);
 
   useEffect(() => {
+    if (isPanelDismissed()) {
+      setBootstrapped(true);
+      setLoading(false);
+      return;
+    }
     const initial = readPersistedSecret();
     setStoredSecret(initial);
     setSecret(initial);
@@ -51,7 +74,11 @@ export function useAdminAuth() {
   }, []);
 
   const resolveSecret = useCallback(
-    (override?: string) => (override ?? (storedSecret || readPersistedSecret())).trim(),
+    (override?: string) => {
+      if (override) return override.trim();
+      if (isPanelDismissed()) return "";
+      return (storedSecret || readPersistedSecret()).trim();
+    },
     [storedSecret]
   );
 
@@ -60,8 +87,15 @@ export function useAdminAuth() {
   }, [resolveSecret]);
 
   const refreshSession = useCallback(
-    async (options?: { showError?: boolean; secretOverride?: string }) => {
+    async (options?: { showError?: boolean; secretOverride?: string; force?: boolean }) => {
       if (refreshInFlight.current) return;
+
+      if (!options?.force && isPanelDismissed() && !options?.secretOverride) {
+        setSession(null);
+        setLoading(false);
+        return;
+      }
+
       refreshInFlight.current = true;
       setLoading(true);
       if (options?.showError) {
@@ -88,6 +122,8 @@ export function useAdminAuth() {
           }
           return;
         }
+
+        sessionStorage.removeItem(DISMISSED_KEY);
 
         if (activeSecret) {
           sessionStorage.setItem(SECRET_KEY, activeSecret);
@@ -116,23 +152,25 @@ export function useAdminAuth() {
   useEffect(() => {
     if (!bootstrapped) return;
     void refreshSession();
-    // Only auto-check once after reading URL / sessionStorage secret.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [bootstrapped]);
 
   async function unlockWithSecret() {
     const trimmed = secret.trim();
     if (!trimmed) return;
-    await refreshSession({ showError: true, secretOverride: trimmed });
+    sessionStorage.removeItem(DISMISSED_KEY);
+    await refreshSession({ showError: true, secretOverride: trimmed, force: true });
   }
 
   function lockSecret() {
+    sessionStorage.setItem(DISMISSED_KEY, "1");
     sessionStorage.removeItem(SECRET_KEY);
+    stripSecretFromUrl();
     setStoredSecret("");
     setSecret("");
     setError("");
     setSession(null);
-    void refreshSession();
+    setLoading(false);
   }
 
   return {
