@@ -35,6 +35,7 @@ import {
   setUserPhone,
 } from "@/lib/user-session";
 import { t } from "@/lib/i18n";
+import { PULL_REFRESH_EVENT } from "@/lib/app-events";
 
 type HistoryFilter = "all" | "posted" | "accepted" | "completed";
 
@@ -276,6 +277,17 @@ export function ProfilePanel() {
       .then((res) => setIsModerator(res.ok))
       .catch(() => setIsModerator(false));
   }, [savedPhone]);
+
+  useEffect(() => {
+    const onPullRefresh = () => {
+      if (isValidRuPhone(savedPhone)) {
+        void loadProfile(savedPhone);
+      }
+    };
+
+    window.addEventListener(PULL_REFRESH_EVENT, onPullRefresh);
+    return () => window.removeEventListener(PULL_REFRESH_EVENT, onPullRefresh);
+  }, [savedPhone, loadProfile]);
 
   useEffect(() => {
     if (isValidRuPhone(savedPhone)) {
@@ -897,19 +909,19 @@ export function ProfilePanel() {
               </Link>
             </div>
           )}
-
-          {isValidRuPhone(savedPhone) && (
-            <div className="mt-8 border-t border-line pt-6 text-center">
-              <button
-                type="button"
-                onClick={logout}
-                className="text-[15px] font-medium text-muted transition active:text-rose-600"
-              >
-                {t("profile.logout")}
-              </button>
-            </div>
-          )}
         </section>
+      )}
+
+      {isValidRuPhone(savedPhone) && (
+        <div className="border-t border-line pt-6 text-center">
+          <button
+            type="button"
+            onClick={logout}
+            className="text-[15px] font-medium text-muted transition active:text-rose-600"
+          >
+            {t("profile.logout")}
+          </button>
+        </div>
       )}
 
       <DetailSheet

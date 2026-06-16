@@ -7,6 +7,7 @@ import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { formatRuPhone, isValidRuPhone } from "@/lib/phone";
 import { getTaskStatusBadge } from "@/lib/task-status";
 import { t } from "@/lib/i18n";
+import { PULL_REFRESH_EVENT } from "@/lib/app-events";
 
 type Overview = {
   openTasks: number;
@@ -125,6 +126,35 @@ export function AdminDashboard({ initialTab }: { initialTab?: string }) {
     const data = (await res.json()) as { submissions?: IdentityRow[] };
     if (res.ok) setIdentityQueue(data.submissions ?? []);
   }, [auth.authHeaders]);
+
+  const reloadActiveTab = useCallback(async () => {
+    if (!auth.session) return;
+    await loadOverview();
+    if (tab === "bans") await loadBans();
+    if (tab === "tasks") await loadTasks();
+    if (tab === "moderators") await loadModerators();
+    if (tab === "identity") await loadIdentityQueue();
+  }, [
+    auth.session,
+    tab,
+    loadOverview,
+    loadBans,
+    loadTasks,
+    loadModerators,
+    loadIdentityQueue,
+  ]);
+
+  useEffect(() => {
+    if (!auth.session) return;
+
+    const onPullRefresh = () => {
+      void reloadActiveTab();
+      void auth.refreshSession({ force: true });
+    };
+
+    window.addEventListener(PULL_REFRESH_EVENT, onPullRefresh);
+    return () => window.removeEventListener(PULL_REFRESH_EVENT, onPullRefresh);
+  }, [auth.session, auth.refreshSession, reloadActiveTab]);
 
   useEffect(() => {
     if (!auth.session) return;

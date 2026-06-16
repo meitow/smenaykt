@@ -1,12 +1,14 @@
 "use client";
 
-import { useEffect } from "react";
-import { usePathname } from "next/navigation";
+import { useCallback, useEffect } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import { AppHeader } from "@/components/AppHeader";
 import { PageHeaderWithBack } from "@/components/PageHeaderWithBack";
 import { DesktopNav } from "@/components/DesktopNav";
 import { BottomNav } from "@/components/BottomNav";
 import { NotificationWatcher } from "@/components/NotificationWatcher";
+import { PullToRefresh } from "@/components/PullToRefresh";
+import { dispatchPullRefresh } from "@/lib/app-events";
 import { isMobileTaskChatPath, isMobileTaskDetailPath } from "@/lib/route-patterns";
 import { t } from "@/lib/i18n";
 
@@ -18,9 +20,15 @@ const TAB_BACK_HEADERS: Record<string, string> = {
 
 export function MobileShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
   const isTaskChat = isMobileTaskChatPath(pathname);
   const isDetail = isMobileTaskDetailPath(pathname);
   const tabBackTitleKey = TAB_BACK_HEADERS[pathname];
+
+  const handlePullRefresh = useCallback(async () => {
+    dispatchPullRefresh();
+    router.refresh();
+  }, [router]);
 
   useEffect(() => {
     if (!isTaskChat) return;
@@ -49,6 +57,7 @@ export function MobileShell({ children }: { children: React.ReactNode }) {
 
   return (
     <>
+      <PullToRefresh onRefresh={handlePullRefresh} />
       <div className="ambient-blob -left-16 top-24 h-48 w-48 bg-brand/25" aria-hidden />
       <div className="ambient-blob -right-12 top-64 h-40 w-40 bg-taiga/20" aria-hidden />
 

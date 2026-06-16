@@ -15,6 +15,7 @@ import {
   type TaskListFilters,
 } from "@/lib/task-filters";
 import { t } from "@/lib/i18n";
+import { PULL_REFRESH_EVENT } from "@/lib/app-events";
 
 function isTaskArray(value: unknown): value is Task[] {
   return Array.isArray(value);
@@ -93,6 +94,14 @@ export function TaskFeed({
 
   useEffect(() => {
     load();
+  }, [load]);
+
+  useEffect(() => {
+    const onPullRefresh = () => {
+      void load();
+    };
+    window.addEventListener(PULL_REFRESH_EVENT, onPullRefresh);
+    return () => window.removeEventListener(PULL_REFRESH_EVENT, onPullRefresh);
   }, [load]);
 
   function handleFiltersChange(next: TaskListFilters) {
