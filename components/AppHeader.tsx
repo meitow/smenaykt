@@ -20,6 +20,11 @@ function resolveDisplayName(localName: string, serverName?: string): string {
 export function AppHeader() {
   const [displayName, setDisplayName] = useState(() => t("home.headerGuestName"));
   const [subtitle, setSubtitle] = useState(() => t("home.headerGuestHint"));
+  const [subtitleAction, setSubtitleAction] = useState(() => {
+    if (typeof window === "undefined") return false;
+    const phone = normalizeRuPhone(getUserPhone());
+    return !phone || !isValidRuPhone(phone);
+  });
   const [avatarUrl, setAvatarUrl] = useState("");
 
   const refreshSummary = useCallback(async () => {
@@ -31,6 +36,7 @@ export function AppHeader() {
     if (!phone || !isValidRuPhone(phone)) {
       setDisplayName(resolveDisplayName(localName));
       setSubtitle(t("home.headerGuestHint"));
+      setSubtitleAction(true);
       return;
     }
 
@@ -39,6 +45,7 @@ export function AppHeader() {
       if (!res.ok) {
         setDisplayName(resolveDisplayName(localName));
         setSubtitle(t("home.headerGuestHint"));
+        setSubtitleAction(true);
         return;
       }
 
@@ -47,10 +54,15 @@ export function AppHeader() {
       if (data.avatarUrl) {
         setAvatarUrl(data.avatarUrl);
       }
-      setSubtitle(formatProfileHeaderSubtitle(data.stats));
+      const statsSubtitle = formatProfileHeaderSubtitle(data.stats);
+      setSubtitle(statsSubtitle);
+      setSubtitleAction(
+        statsSubtitle === t("home.headerStatsEmpty") || statsSubtitle === t("home.headerGuestHint")
+      );
     } catch {
       setDisplayName(resolveDisplayName(localName));
       setSubtitle(t("home.headerGuestHint"));
+      setSubtitleAction(true);
     }
   }, []);
 
@@ -69,12 +81,29 @@ export function AppHeader() {
     <header className="sticky top-0 z-20 border-b border-line/80 bg-surface/90 backdrop-blur-md">
       <div className="h-0.5 w-full bg-brand-gradient" aria-hidden />
       <div className="mx-auto flex max-w-lg items-center gap-3 px-4 py-2.5">
-        <Link href="/profile" className="flex min-w-0 flex-1 items-center gap-3 active:opacity-90">
+        <Link
+          href="/profile"
+          className={`flex min-w-0 flex-1 items-center gap-3 active:opacity-90 ${
+            subtitleAction ? "rounded-2xl bg-brand-light/50 px-2 py-1 -mx-2 ring-1 ring-brand/15" : ""
+          }`}
+        >
           <UserAvatar name={displayName} imageUrl={avatarUrl || null} size={40} />
-          <div className="min-w-0">
+          <div className="min-w-0 flex-1">
             <p className="truncate text-[17px] font-bold text-ink">{displayName}</p>
-            <p className="truncate text-[13px] text-muted">{subtitle}</p>
+            <p
+              className={`truncate text-[13px] leading-snug ${
+                subtitleAction ? "font-medium text-brand-dark" : "text-muted"
+              }`}
+            >
+              {subtitle}
+              {subtitleAction ? <span className="text-brand"> →</span> : null}
+            </p>
           </div>
+          {subtitleAction && (
+            <span className="shrink-0 text-brand" aria-hidden>
+              ›
+            </span>
+          )}
         </Link>
       </div>
     </header>

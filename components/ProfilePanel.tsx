@@ -725,21 +725,21 @@ export function ProfilePanel() {
             <p className="mt-2 text-[13px] font-medium text-taiga">{t("profile.saveSuccess")}</p>
           )}
 
-          <div className="mt-4 flex gap-2">
-            {hasUnsavedChanges && (
+          {hasUnsavedChanges && (
+            <div className="mt-4 flex gap-2">
               <button type="button" onClick={syncDraftFromSaved} className="btn-secondary flex-1 !py-3">
                 {t("profile.cancelChanges")}
               </button>
-            )}
-            <button
-              type="button"
-              onClick={saveChanges}
-              disabled={saving || !isValidRuPhone(phone)}
-              className="btn-gradient flex-1 disabled:opacity-50"
-            >
-              {saving ? t("profile.saving") : t("profile.saveChanges")}
-            </button>
-          </div>
+              <button
+                type="button"
+                onClick={saveChanges}
+                disabled={saving || !isValidRuPhone(phone)}
+                className="btn-gradient flex-1 disabled:opacity-50"
+              >
+                {saving ? t("profile.saving") : t("profile.saveChanges")}
+              </button>
+            </div>
+          )}
 
           {isValidRuPhone(savedPhone) && (
             <button

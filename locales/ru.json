@@ -47,7 +47,7 @@
     "headerStats": "{rating} ★ · {orders}",
     "headerStatsNoRating": "Нет оценок · {orders}",
     "headerStatsNoOrders": "{rating} ★ · пока нет заказов",
-    "headerStatsEmpty": "Пока нет заказов и отзывов",
+    "headerStatsEmpty": "Пока нет заказов и отзывов — откройте профиль",
     "seeAll": "Все →",
     "tasksAvailable": "{count} заданий рядом",
     "noTasksShort": "Пока нет заданий",
