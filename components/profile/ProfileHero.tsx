@@ -40,8 +40,16 @@ export function ProfileHero({
 }: ProfileHeroProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [dragOver, setDragOver] = useState(false);
+  const [showPhotoHint, setShowPhotoHint] = useState(false);
+
+  function openPicker() {
+    setShowPhotoHint(true);
+    inputRef.current?.click();
+    window.setTimeout(() => setShowPhotoHint(false), 5000);
+  }
 
   function pickFile(file: File | undefined) {
+    setShowPhotoHint(false);
     if (!file) return;
     onAvatarPick(file);
   }
@@ -55,7 +63,7 @@ export function ProfileHero({
             <>
               <button
                 type="button"
-                onClick={() => inputRef.current?.click()}
+                onClick={openPicker}
                 disabled={uploading}
                 className={`absolute -bottom-1 -right-1 flex h-9 w-9 items-center justify-center rounded-full bg-brand text-white shadow-soft transition active:scale-95 disabled:opacity-60 ${
                   dragOver ? "ring-2 ring-brand ring-offset-2" : ""
@@ -99,7 +107,9 @@ export function ProfileHero({
           )}
         </div>
 
-        {editable && <p className="mt-3 text-[13px] text-muted">{t("profile.photoHint")}</p>}
+        {editable && showPhotoHint && (
+          <p className="mt-3 text-[12px] text-muted/60">{t("profile.photoHint")}</p>
+        )}
       </div>
     </section>
   );

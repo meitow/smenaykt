@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { formatRuPhone, isValidRuPhone, ruPhoneLocalPart } from "@/lib/phone";
+import { RuPhoneInput } from "@/components/RuPhoneInput";
+import { isValidRuPhone, ruPhoneLocalPart } from "@/lib/phone";
 import { t } from "@/lib/i18n";
 
 type PhoneFieldProps = {
@@ -17,56 +18,36 @@ export function PhoneField({
   required = true,
   onValidityChange,
 }: PhoneFieldProps) {
-  const [local, setLocal] = useState(() => ruPhoneLocalPart(defaultValue));
-  const [touched, setTouched] = useState(false);
+  const [phone, setPhone] = useState(() => {
+    const digits = ruPhoneLocalPart(defaultValue);
+    return digits.length === 10 ? `+7${digits}` : "";
+  });
 
   useEffect(() => {
-    if (local.length > 0 || !defaultValue) return;
-    const part = ruPhoneLocalPart(defaultValue);
-    if (part.length === 10 && isValidRuPhone(`+7${part}`)) {
-      setLocal(part);
+    if (phone || !defaultValue) return;
+    const digits = ruPhoneLocalPart(defaultValue);
+    if (digits.length === 10 && isValidRuPhone(`+7${digits}`)) {
+      setPhone(`+7${digits}`);
       onValidityChange?.(true);
     }
-  }, [defaultValue, local.length, onValidityChange]);
+  }, [defaultValue, onValidityChange, phone]);
 
-  const full = `+7${local}`;
-  const valid = local.length === 10 && isValidRuPhone(full);
-  const showError = touched && !valid && local.length > 0;
-
-  function update(next: string) {
-    const digits = next.replace(/\D/g, "").slice(0, 10);
-    setLocal(digits);
-    onValidityChange?.(digits.length === 10 && isValidRuPhone(`+7${digits}`));
-  }
+  const valid = isValidRuPhone(phone);
 
   return (
-    <label className="block">
-      <span className="text-sm font-medium text-muted">{t("post.phoneLabel")}</span>
-      <div className="mt-1.5 flex items-center gap-2">
-        <span className="input-field !mt-0 flex w-[4.5rem] shrink-0 items-center justify-center !px-0 font-semibold text-brand">
-          +7
-        </span>
-        <input
-          name={name}
-          type="tel"
-          inputMode="numeric"
-          autoComplete="tel-national"
-          required={required}
-          value={local}
-          onChange={(e) => update(e.target.value)}
-          onBlur={() => setTouched(true)}
-          placeholder="9991234567"
-          maxLength={10}
-          pattern="[0-9]{10}"
-          className="input-field !mt-0 flex-1 tracking-wide"
-          aria-invalid={showError}
-        />
-      </div>
-      <p className="mt-1 text-xs text-muted">
-        {valid ? formatRuPhone(full) : t("post.phoneHint")}
-      </p>
-      {showError && <p className="mt-1 text-sm text-rose-600">{t("post.phoneInvalid")}</p>}
-      <input type="hidden" name={`${name}Normalized`} value={valid ? `+7${local}` : ""} />
-    </label>
+    <>
+      <RuPhoneInput
+        value={phone}
+        onChange={setPhone}
+        onValidityChange={onValidityChange}
+        label={t("post.phoneLabel")}
+        hint={t("post.phoneHint")}
+        invalidHint={t("post.phoneInvalid")}
+        required={required}
+        className=""
+      />
+      <input type="hidden" name={name} value={phone} />
+      <input type="hidden" name={`${name}Normalized`} value={valid ? phone : ""} />
+    </>
   );
 }

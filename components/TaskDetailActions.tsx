@@ -5,7 +5,8 @@ import Link from "next/link";
 import { legalDocPath } from "@/lib/legal";
 import { useRouter } from "next/navigation";
 import { DetailSheet } from "@/components/DetailSheet";
-import { formatRuPhone, isValidRuPhone, normalizeRuPhone, ruPhoneLocalPart } from "@/lib/phone";
+import { RuPhoneInput } from "@/components/RuPhoneInput";
+import { formatRuPhone, isValidRuPhone, normalizeRuPhone } from "@/lib/phone";
 import {
   userAwaitingCounterparty,
   userCanConfirmComplete,
@@ -449,49 +450,13 @@ export function ProfilePhoneField({
   value: string;
   onChange: (phone: string) => void;
 }) {
-  const [local, setLocal] = useState(ruPhoneLocalPart(value));
-
-  useEffect(() => {
-    setLocal(ruPhoneLocalPart(value));
-  }, [value]);
-
-  function update(next: string) {
-    const digits = next.replace(/\D/g, "").slice(0, 10);
-    setLocal(digits);
-    if (digits.length === 0) {
-      onChange("");
-      return;
-    }
-    if (digits.length === 10) {
-      const full = `+7${digits}`;
-      if (isValidRuPhone(full)) onChange(full);
-    }
-  }
-
-  const full = `+7${local}`;
-  const valid = local.length === 10 && isValidRuPhone(full);
-
   return (
-    <label className="mt-4 block text-left">
-      <span className="text-[15px] font-medium text-muted">{t("profile.phoneLabel")}</span>
-      <div className="mt-1.5 flex items-center gap-2">
-        <span className="input-field !mt-0 flex w-[4.5rem] shrink-0 items-center justify-center !px-0 font-semibold text-brand">
-          +7
-        </span>
-        <input
-          type="tel"
-          inputMode="numeric"
-          autoComplete="tel-national"
-          value={local}
-          onChange={(e) => update(e.target.value)}
-          placeholder="9991234567"
-          maxLength={10}
-          className="input-field !mt-0 flex-1 tracking-wide"
-        />
-      </div>
-      <p className="mt-1 text-[13px] text-muted">
-        {valid ? formatRuPhone(full) : t("profile.phoneHint")}
-      </p>
-    </label>
+    <RuPhoneInput
+      value={value}
+      onChange={onChange}
+      label={t("profile.phoneLabel")}
+      hint={t("profile.phoneHint")}
+      invalidHint={t("profile.phoneInvalidSave")}
+    />
   );
 }

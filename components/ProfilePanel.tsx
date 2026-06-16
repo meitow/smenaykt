@@ -16,6 +16,7 @@ import {
 } from "@/lib/task-completion";
 import type { ProfileData, ProfilePendingReview, ProfileReview, Task } from "@/lib/types";
 import { legalDocPath } from "@/lib/legal";
+import { SUPPORT_TELEGRAM_URL, supportMailtoUrl } from "@/lib/support";
 import {
   clearUserSession,
   getUserAvatarUrl,
@@ -741,16 +742,6 @@ export function ProfilePanel() {
             </div>
           )}
 
-          {isValidRuPhone(savedPhone) && (
-            <button
-              type="button"
-              onClick={logout}
-              className="btn-secondary mt-4 w-full !py-3 text-[15px]"
-            >
-              {t("profile.logout")}
-            </button>
-          )}
-
           <div className="mt-6 border-t border-line pt-5">
             <h2 className="text-[15px] font-semibold text-ink">{t("profile.legalTitle")}</h2>
             <div className="mt-3 space-y-2">
@@ -765,6 +756,36 @@ export function ProfilePanel() {
               </Link>
             </div>
           </div>
+
+          <div className="mt-5 border-t border-line pt-5">
+            <h2 className="text-[15px] font-semibold text-ink">{t("profile.helpTitle")}</h2>
+            <p className="mt-1 text-[14px] text-muted">{t("profile.helpHint")}</p>
+            <div className="mt-3 space-y-2">
+              <a
+                href={SUPPORT_TELEGRAM_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block text-[15px] font-medium text-brand"
+              >
+                {t("profile.helpTelegram")}
+              </a>
+              <a href={supportMailtoUrl()} className="block text-[15px] font-medium text-brand">
+                {t("profile.helpEmail")}
+              </a>
+            </div>
+          </div>
+
+          {isValidRuPhone(savedPhone) && (
+            <div className="mt-8 border-t border-line pt-6 text-center">
+              <button
+                type="button"
+                onClick={logout}
+                className="text-[15px] font-medium text-muted transition active:text-rose-600"
+              >
+                {t("profile.logout")}
+              </button>
+            </div>
+          )}
         </section>
       )}
 
