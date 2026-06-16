@@ -92,7 +92,7 @@ export function TaskFeed({
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       {showHero && (
         <HomeHero taskCount={loading ? undefined : tasks.length} loading={loading} />
       )}

@@ -24,7 +24,7 @@ const config: Config = {
         page: "#F2F7F5",
         surface: "#FFFFFF",
         ink: "#1A1A1A",
-        muted: "#6B7280",
+        muted: "#4B5563",
         line: "#E5E7EB",
       },
       boxShadow: {

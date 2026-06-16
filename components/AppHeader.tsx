@@ -68,19 +68,13 @@ export function AppHeader() {
   return (
     <header className="sticky top-0 z-20 border-b border-line/80 bg-surface/90 backdrop-blur-md">
       <div className="h-0.5 w-full bg-brand-gradient" aria-hidden />
-      <div className="mx-auto flex max-w-lg items-center justify-between gap-3 px-4 py-3">
-        <Link href="/profile" className="flex min-w-0 items-center gap-3 active:opacity-90">
+      <div className="mx-auto flex max-w-lg items-center gap-3 px-4 py-2.5">
+        <Link href="/profile" className="flex min-w-0 flex-1 items-center gap-3 active:opacity-90">
           <UserAvatar name={displayName} imageUrl={avatarUrl || null} size={40} />
           <div className="min-w-0">
             <p className="truncate text-[17px] font-bold text-ink">{displayName}</p>
             <p className="truncate text-[13px] text-muted">{subtitle}</p>
           </div>
-        </Link>
-        <Link
-          href="/post"
-          className="shrink-0 rounded-2xl bg-brand-gradient px-4 py-2 text-[14px] font-semibold text-white shadow-soft transition duration-200 hover:brightness-105 active:scale-[0.98]"
-        >
-          {t("nav.post")}
         </Link>
       </div>
     </header>

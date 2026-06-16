@@ -117,13 +117,13 @@ export function TaskFiltersCompact({
   return (
     <>
       <div className="space-y-2">
-        <div className="-mx-1 flex gap-2 overflow-x-auto pb-0.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
           {triggers.map((item) => (
             <button
               key={item.key}
               type="button"
               onClick={() => setOpenSheet(item.key)}
-              className={`filter-trigger shrink-0 ${item.active ? "filter-trigger-active" : ""}`}
+              className={`filter-trigger w-full ${item.active ? "filter-trigger-active" : ""}`}
             >
               <span className="filter-trigger-label">{item.label}</span>
               <span className="filter-trigger-value">
