@@ -889,7 +889,10 @@ export function ProfilePanel() {
 
           {isModerator && (
             <div className="mt-5 border-t border-line pt-5">
-              <Link href="/admin?from=profile" className="btn-outline w-full text-center">
+              <Link
+                href={`/admin?from=profile&phone=${encodeURIComponent(savedPhone)}`}
+                className="btn-outline w-full text-center"
+              >
                 {t("admin.openModeration")}
               </Link>
             </div>

@@ -321,6 +321,11 @@ export function AdminDashboard({ initialTab }: { initialTab?: string }) {
           <Link href="/profile" className="btn-soft mt-4 block text-center">
             {t("admin.openProfile")}
           </Link>
+          {auth.sessionPhone && isValidRuPhone(auth.sessionPhone) && (
+            <button type="button" onClick={auth.unlockWithPhone} className="btn-gradient mt-3 w-full">
+              {t("admin.unlockByPhone")}
+            </button>
+          )}
         </section>
 
         <section className="info-card mt-4 p-5">

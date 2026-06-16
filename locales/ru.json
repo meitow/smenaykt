@@ -480,6 +480,7 @@
     "currentPhone": "Сейчас в приложении: {phone}",
     "noPhoneInApp": "Укажите телефон в профиле — модератор входит тем же номером.",
     "openProfile": "Открыть профиль",
+    "unlockByPhone": "Войти по номеру",
     "sessionPhone": "Модератор: {phone}",
     "sessionSecret": "Вход по ключу владельца",
     "sessionUnknown": "Сессия модератора",

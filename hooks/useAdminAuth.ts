@@ -1,7 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { isValidRuPhone } from "@/lib/phone";
+import { usePathname, useSearchParams } from "next/navigation";
+import { isValidRuPhone, normalizeRuPhone } from "@/lib/phone";
 import { getUserPhone } from "@/lib/user-session";
 
 const SECRET_KEY = "smenaykt_admin_secret";
@@ -28,23 +29,19 @@ function stripSecretFromUrl() {
   window.history.replaceState({}, "", next);
 }
 
-function stripFromProfileFromUrl() {
+function stripEntryParamsFromUrl() {
   if (typeof window === "undefined") return;
   const url = new URL(window.location.href);
-  if (!url.searchParams.has("from")) return;
-  url.searchParams.delete("from");
+  let changed = false;
+  for (const key of ["from", "phone"]) {
+    if (url.searchParams.has(key)) {
+      url.searchParams.delete(key);
+      changed = true;
+    }
+  }
+  if (!changed) return;
   const next = `${url.pathname}${url.search}${url.hash}`;
   window.history.replaceState({}, "", next);
-}
-
-function readFromProfile(): boolean {
-  if (typeof window === "undefined") return false;
-  return new URLSearchParams(window.location.search).get("from") === "profile";
-}
-
-function hasModeratorPhone(): boolean {
-  const phone = getUserPhone();
-  return Boolean(phone && isValidRuPhone(phone));
 }
 
 function isPanelDismissed() {
@@ -76,12 +73,32 @@ function resolveSecretForAuth(override?: string): string {
   return "";
 }
 
+function resolveModeratorPhone(searchParams: URLSearchParams | null): string {
+  const fromUrl = searchParams?.get("phone")?.trim() ?? "";
+  const normalizedFromUrl = normalizeRuPhone(fromUrl);
+  if (normalizedFromUrl && isValidRuPhone(normalizedFromUrl)) {
+    return normalizedFromUrl;
+  }
+
+  const fromSession = normalizeRuPhone(getUserPhone());
+  if (fromSession && isValidRuPhone(fromSession)) {
+    return fromSession;
+  }
+
+  return "";
+}
+
 function sessionHeaders(secret: string, phone: string | null): HeadersInit {
   return {
     "Content-Type": "application/json",
     ...(phone ? { "x-moderator-phone": phone } : {}),
     ...(secret ? { "x-admin-secret": secret } : {}),
   };
+}
+
+function sessionUrl(phone: string | null): string {
+  if (!phone) return "/api/admin/session";
+  return `/api/admin/session?phone=${encodeURIComponent(phone)}`;
 }
 
 function clearOwnerCredentials() {
@@ -91,49 +108,42 @@ function clearOwnerCredentials() {
 }
 
 export function useAdminAuth() {
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [session, setSession] = useState<AdminSession | null>(null);
   const [secret, setSecret] = useState("");
   const [storedSecret, setStoredSecret] = useState("");
+  const [sessionPhone, setSessionPhone] = useState("");
   const [bootstrapped, setBootstrapped] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const refreshInFlight = useRef(false);
 
   useEffect(() => {
-    if (readFromProfile()) {
+    if (searchParams.get("from") === "profile") {
       sessionStorage.removeItem(DISMISSED_KEY);
-      stripFromProfileFromUrl();
     }
 
     if (isPanelDismissed()) {
       setBootstrapped(true);
       return;
     }
+
     const fromUrl = readSecretFromUrl();
     const initial = fromUrl || readPersistedSecretForForm();
     setStoredSecret(initial);
     setSecret(initial);
     setBootstrapped(true);
-  }, []);
+  }, [searchParams]);
 
   const authHeaders = useCallback((): HeadersInit => {
-    return sessionHeaders(resolveSecretForAuth(), getUserPhone());
-  }, [session?.canManageModerators, storedSecret]);
+    const phone = resolveModeratorPhone(searchParams);
+    return sessionHeaders(resolveSecretForAuth(), phone || null);
+  }, [searchParams, session?.canManageModerators, storedSecret]);
 
   const refreshSession = useCallback(
     async (options?: { showError?: boolean; secretOverride?: string; force?: boolean }) => {
       if (refreshInFlight.current) return;
-
-      if (
-        !options?.force &&
-        isPanelDismissed() &&
-        !options?.secretOverride &&
-        !hasModeratorPhone()
-      ) {
-        setSession(null);
-        setLoading(false);
-        return;
-      }
 
       refreshInFlight.current = true;
       setLoading(true);
@@ -142,11 +152,12 @@ export function useAdminAuth() {
       }
 
       const activeSecret = resolveSecretForAuth(options?.secretOverride);
-      const phone = getUserPhone();
+      const phone = resolveModeratorPhone(searchParams);
+      setSessionPhone(phone);
 
       try {
-        const res = await fetch("/api/admin/session", {
-          headers: sessionHeaders(activeSecret, phone),
+        const res = await fetch(sessionUrl(phone || null), {
+          headers: sessionHeaders(activeSecret, phone || null),
         });
         const data = (await res.json()) as AdminSession & { error?: string };
 
@@ -163,6 +174,7 @@ export function useAdminAuth() {
         }
 
         sessionStorage.removeItem(DISMISSED_KEY);
+        stripEntryParamsFromUrl();
 
         if (data.viaSecret) {
           sessionStorage.setItem(OWNER_MODE_KEY, "1");
@@ -191,20 +203,29 @@ export function useAdminAuth() {
         setLoading(false);
       }
     },
-    []
+    [searchParams]
   );
 
   useEffect(() => {
-    if (!bootstrapped) return;
-    void refreshSession();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [bootstrapped]);
+    if (!bootstrapped || pathname !== "/admin") return;
+    void refreshSession({ force: true });
+  }, [bootstrapped, pathname, searchParams, refreshSession]);
 
   async function unlockWithSecret() {
     const trimmed = secret.trim();
     if (!trimmed) return;
     sessionStorage.removeItem(DISMISSED_KEY);
     await refreshSession({ showError: true, secretOverride: trimmed, force: true });
+  }
+
+  async function unlockWithPhone() {
+    const phone = resolveModeratorPhone(searchParams);
+    if (!phone) {
+      setError("Укажите телефон в профиле");
+      return;
+    }
+    sessionStorage.removeItem(DISMISSED_KEY);
+    await refreshSession({ force: true, showError: true });
   }
 
   function lockSecret() {
@@ -225,9 +246,10 @@ export function useAdminAuth() {
     setSecret,
     storedSecret,
     unlockWithSecret,
+    unlockWithPhone,
     lockSecret,
     authHeaders,
     refreshSession,
-    sessionPhone: getUserPhone(),
+    sessionPhone,
   };
 }
