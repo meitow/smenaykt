@@ -128,6 +128,9 @@ export function AdminDashboard({ initialTab }: { initialTab?: string }) {
 
   useEffect(() => {
     if (!auth.session) return;
+    if (!auth.session.canManageModerators && tab === "moderators") {
+      setTab("overview");
+    }
     void loadOverview();
     if (tab === "bans") void loadBans();
     if (tab === "tasks") void loadTasks();
@@ -349,6 +352,7 @@ export function AdminDashboard({ initialTab }: { initialTab?: string }) {
       onTabChange={setTab}
       sessionPhone={auth.session.phone ? formatRuPhone(auth.session.phone) : auth.sessionPhone}
       viaSecret={auth.session.viaSecret}
+      canManageModerators={auth.session.canManageModerators}
       onLogout={auth.lockSecret}
     >
       {panelError && <p className="mb-4 text-[14px] text-rose-600">{panelError}</p>}

@@ -5,6 +5,7 @@ import { getUserPhone } from "@/lib/user-session";
 
 const SECRET_KEY = "smenaykt_admin_secret";
 const DISMISSED_KEY = "smenaykt_admin_dismissed";
+const OWNER_MODE_KEY = "smenaykt_admin_owner";
 
 export type AdminSession = {
   phone: string | null;
@@ -31,17 +32,28 @@ function isPanelDismissed() {
   return sessionStorage.getItem(DISMISSED_KEY) === "1";
 }
 
-function readPersistedSecret(): string {
-  if (typeof window === "undefined") return "";
-  if (isPanelDismissed()) {
-    return "";
-  }
-  const fromUrl = readSecretFromUrl();
-  if (fromUrl) {
-    sessionStorage.setItem(SECRET_KEY, fromUrl);
-    return fromUrl;
-  }
+function isOwnerMode() {
+  if (typeof window === "undefined") return false;
+  return sessionStorage.getItem(OWNER_MODE_KEY) === "1";
+}
+
+function readPersistedSecretForForm(): string {
+  if (typeof window === "undefined" || isPanelDismissed()) return "";
   return sessionStorage.getItem(SECRET_KEY)?.trim() ?? "";
+}
+
+function resolveSecretForAuth(override?: string): string {
+  if (override) return override.trim();
+  if (isPanelDismissed()) return "";
+
+  const fromUrl = readSecretFromUrl();
+  if (fromUrl) return fromUrl;
+
+  if (isOwnerMode()) {
+    return sessionStorage.getItem(SECRET_KEY)?.trim() ?? "";
+  }
+
+  return "";
 }
 
 function sessionHeaders(secret: string, phone: string | null): HeadersInit {
@@ -50,6 +62,12 @@ function sessionHeaders(secret: string, phone: string | null): HeadersInit {
     ...(phone ? { "x-moderator-phone": phone } : {}),
     ...(secret ? { "x-admin-secret": secret } : {}),
   };
+}
+
+function clearOwnerCredentials() {
+  sessionStorage.removeItem(OWNER_MODE_KEY);
+  sessionStorage.removeItem(SECRET_KEY);
+  stripSecretFromUrl();
 }
 
 export function useAdminAuth() {
@@ -67,24 +85,16 @@ export function useAdminAuth() {
       setLoading(false);
       return;
     }
-    const initial = readPersistedSecret();
+    const fromUrl = readSecretFromUrl();
+    const initial = fromUrl || readPersistedSecretForForm();
     setStoredSecret(initial);
     setSecret(initial);
     setBootstrapped(true);
   }, []);
 
-  const resolveSecret = useCallback(
-    (override?: string) => {
-      if (override) return override.trim();
-      if (isPanelDismissed()) return "";
-      return (storedSecret || readPersistedSecret()).trim();
-    },
-    [storedSecret]
-  );
-
   const authHeaders = useCallback((): HeadersInit => {
-    return sessionHeaders(resolveSecret(), getUserPhone());
-  }, [resolveSecret]);
+    return sessionHeaders(resolveSecretForAuth(), getUserPhone());
+  }, [session?.canManageModerators, storedSecret]);
 
   const refreshSession = useCallback(
     async (options?: { showError?: boolean; secretOverride?: string; force?: boolean }) => {
@@ -102,7 +112,7 @@ export function useAdminAuth() {
         setError("");
       }
 
-      const activeSecret = resolveSecret(options?.secretOverride);
+      const activeSecret = resolveSecretForAuth(options?.secretOverride);
       const phone = getUserPhone();
 
       try {
@@ -114,7 +124,7 @@ export function useAdminAuth() {
         if (!res.ok) {
           setSession(null);
           if (options?.showError) {
-            sessionStorage.removeItem(SECRET_KEY);
+            clearOwnerCredentials();
             setStoredSecret("");
             setError(data.error ?? "Неверный ключ доступа");
           } else {
@@ -125,9 +135,15 @@ export function useAdminAuth() {
 
         sessionStorage.removeItem(DISMISSED_KEY);
 
-        if (activeSecret) {
-          sessionStorage.setItem(SECRET_KEY, activeSecret);
-          setStoredSecret(activeSecret);
+        if (data.viaSecret) {
+          sessionStorage.setItem(OWNER_MODE_KEY, "1");
+          if (activeSecret) {
+            sessionStorage.setItem(SECRET_KEY, activeSecret);
+            setStoredSecret(activeSecret);
+          }
+        } else {
+          clearOwnerCredentials();
+          setStoredSecret("");
         }
 
         setSession({
@@ -146,7 +162,7 @@ export function useAdminAuth() {
         setLoading(false);
       }
     },
-    [resolveSecret]
+    []
   );
 
   useEffect(() => {
@@ -164,8 +180,7 @@ export function useAdminAuth() {
 
   function lockSecret() {
     sessionStorage.setItem(DISMISSED_KEY, "1");
-    sessionStorage.removeItem(SECRET_KEY);
-    stripSecretFromUrl();
+    clearOwnerCredentials();
     setStoredSecret("");
     setSecret("");
     setError("");

@@ -20,6 +20,7 @@ type AdminShellProps = {
   onTabChange: (tab: AdminTab) => void;
   sessionPhone: string | null;
   viaSecret: boolean;
+  canManageModerators: boolean;
   onLogout: () => void;
   children: ReactNode;
 };
@@ -29,9 +30,13 @@ export function AdminShell({
   onTabChange,
   sessionPhone,
   viaSecret,
+  canManageModerators,
   onLogout,
   children,
 }: AdminShellProps) {
+  const tabs = canManageModerators
+    ? TABS
+    : TABS.filter((tab) => tab.key !== "moderators");
   return (
     <div className="min-h-screen bg-page">
       <header className="border-b border-line bg-surface/95 backdrop-blur-md">
@@ -63,7 +68,7 @@ export function AdminShell({
 
       <div className="app-shell px-4 py-6 lg:grid lg:grid-cols-[14rem_minmax(0,1fr)] lg:gap-8">
         <nav className="mb-4 flex gap-2 overflow-x-auto pb-1 lg:mb-0 lg:flex-col lg:overflow-visible lg:pb-0">
-          {TABS.map((tab) => (
+          {tabs.map((tab) => (
             <button
               key={tab.key}
               type="button"
