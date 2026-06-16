@@ -133,7 +133,24 @@
   "notifications": {
     "regionLabel": "Уведомления",
     "openTask": "Открыть задание →",
-    "dismiss": "Закрыть"
+    "dismiss": "Закрыть",
+    "bell": "Уведомления и новости",
+    "bellUnread": "Уведомления: {count} непрочитанных",
+    "pageTitle": "Уведомления",
+    "pageHint": "События по заданиям и новости приложения",
+    "sectionTasks": "По заданиям",
+    "sectionTasksHint": "Подтверждения выполнения и закрытие сделок",
+    "sectionUpdates": "Новости и обновления",
+    "sectionUpdatesHint": "Что нового в SmenaYKT",
+    "updatesTagFeature": "Новое",
+    "updatesTagImprovement": "Улучшение",
+    "updatesTagInfo": "Инфо",
+    "loading": "Загружаем…",
+    "emptyTitle": "Пока нет уведомлений",
+    "emptyHint": "Здесь появятся сообщения, когда вторая сторона подтвердит выполнение задания",
+    "needPhoneTitle": "Укажите телефон в профиле",
+    "needPhoneHint": "Без номера мы не сможем привязать уведомления к вашему аккаунту",
+    "needPhoneAction": "Перейти в профиль"
   },
   "share": {
     "whatsapp": "Поделиться в WhatsApp",

@@ -47,6 +47,7 @@ export function NotificationWatcher({ variant }: NotificationWatcherProps) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ phone, ids }),
     }).catch(() => undefined);
+    window.dispatchEvent(new Event("smenaykt_notifications_updated"));
   }, []);
 
   const poll = useCallback(async () => {

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
+import { NotificationBell } from "@/components/NotificationBell";
 import { UserAvatar } from "@/components/UserAvatar";
 import { formatProfileHeaderSubtitle } from "@/lib/profile-header";
 import { isValidRuPhone, normalizeRuPhone } from "@/lib/phone";
@@ -105,6 +106,7 @@ export function AppHeader() {
             </span>
           )}
         </Link>
+        <NotificationBell />
       </div>
     </header>
   );

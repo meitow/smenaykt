@@ -22,13 +22,13 @@ export async function GET(request: NextRequest) {
       take: limit,
     });
 
+    const unreadCount = await prisma.notification.count({
+      where: { recipientPhone: phone, readAt: null },
+    });
+
     return NextResponse.json({
       notifications: rows.map(serializeNotification),
-      unreadCount: unreadOnly
-        ? rows.length
-        : await prisma.notification.count({
-            where: { recipientPhone: phone, readAt: null },
-          }),
+      unreadCount,
     });
   } catch (error) {
     console.error("GET /api/notifications", error);
