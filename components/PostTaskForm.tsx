@@ -160,6 +160,7 @@ export function PostTaskForm() {
 
             <label className="block">
               <span className="field-label">{t("post.placeLabel")}</span>
+              <p className="field-hint">{t("post.placeHint")}</p>
               <input
                 name="place"
                 required
@@ -177,7 +178,6 @@ export function PostTaskForm() {
                 onChange={(e) => setCategory(e.target.value as PersonPostCategory)}
                 className="input-field"
               >
-                <option value={PERSONAL_DEFAULT_CATEGORY}>{t("filters.category.personal")}</option>
                 <optgroup label={t("post.categoryOptionalGroup")}>
                   {LEGACY_PERSONAL_CATEGORIES.map((id) => (
                     <option key={id} value={id}>
@@ -185,6 +185,7 @@ export function PostTaskForm() {
                     </option>
                   ))}
                 </optgroup>
+                <option value={PERSONAL_DEFAULT_CATEGORY}>{t("post.categoryPersonalFallback")}</option>
               </select>
             </label>
 

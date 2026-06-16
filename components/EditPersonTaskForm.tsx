@@ -146,17 +146,24 @@ export function EditPersonTaskForm({ task }: EditPersonTaskFormProps) {
 
           <label className="block">
             <span className="text-[15px] font-medium text-muted">{t("post.placeLabel")}</span>
-            <input name="place" required defaultValue={task.place} className="input-field" />
+            <p className="field-hint">{t("post.placeHint")}</p>
+            <input
+              name="place"
+              required
+              defaultValue={task.place}
+              placeholder={t("post.placePlaceholder")}
+              className="input-field"
+            />
           </label>
 
           <label className="block">
             <span className="text-[15px] font-medium text-muted">{t("post.categoryLabel")}</span>
+            <p className="field-hint">{t("post.categoryHint")}</p>
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value as PersonPostCategory)}
               className="input-field"
             >
-              <option value={PERSONAL_DEFAULT_CATEGORY}>{t("filters.category.personal")}</option>
               <optgroup label={t("post.categoryOptionalGroup")}>
                 {LEGACY_PERSONAL_CATEGORIES.map((id) => (
                   <option key={id} value={id}>
@@ -164,6 +171,7 @@ export function EditPersonTaskForm({ task }: EditPersonTaskFormProps) {
                   </option>
                 ))}
               </optgroup>
+              <option value={PERSONAL_DEFAULT_CATEGORY}>{t("post.categoryPersonalFallback")}</option>
             </select>
           </label>
 

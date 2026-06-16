@@ -7,6 +7,10 @@ import { formatHourlyRate } from "@/lib/pay";
 import { formatDuration } from "@/lib/task-filters";
 import { t } from "@/lib/i18n";
 
+type PartnerTaskCardProps = {
+  task: Task;
+};
+
 export function PartnerTaskCard({ task }: PartnerTaskCardProps) {
   const badge = getTaskStatusBadge(task);
   const workerPhone = task.workerPhone;
