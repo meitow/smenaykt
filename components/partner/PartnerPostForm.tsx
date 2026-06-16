@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { EmojiPicker } from "@/components/EmojiPicker";
+import { TimeField } from "@/components/TimeField";
 import {
   combineDateAndTime,
   defaultDateValue,
@@ -179,23 +180,11 @@ export function PartnerPostForm({ defaultPlace = "" }: PartnerPostFormProps) {
             <div className="grid grid-cols-2 gap-3">
               <label className="block">
                 <span className="text-[15px] font-medium text-muted">{t("post.timeStartLabel")}</span>
-                <input
-                  type="time"
-                  required
-                  value={timeStart}
-                  onChange={(e) => setTimeStart(e.target.value)}
-                  className="input-field"
-                />
+                <TimeField required value={timeStart} onChange={setTimeStart} />
               </label>
               <label className="block">
                 <span className="text-[15px] font-medium text-muted">{t("post.timeEndLabel")}</span>
-                <input
-                  type="time"
-                  required
-                  value={timeEnd}
-                  onChange={(e) => setTimeEnd(e.target.value)}
-                  className="input-field"
-                />
+                <TimeField required value={timeEnd} onChange={setTimeEnd} />
               </label>
             </div>
           </div>

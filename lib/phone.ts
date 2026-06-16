@@ -51,11 +51,15 @@ export function formatRuPhoneInput(digits: string): string {
   const d = digits.replace(/\D/g, "").slice(0, 10);
   if (d.length === 0) return "+7 ";
 
-  let formatted = "+7";
-  if (d.length > 0) formatted += ` ${d.slice(0, 3)}`;
-  if (d.length > 3) formatted += ` ${d.slice(3, 6)}`;
-  if (d.length > 6) formatted += ` ${d.slice(6, 8)}`;
-  if (d.length > 8) formatted += ` ${d.slice(8, 10)}`;
+  const part1 = d.slice(0, 3);
+  const part2 = d.slice(3, 6);
+  const part3 = d.slice(6, 8);
+  const part4 = d.slice(8, 10);
+
+  let formatted = `+7 ${part1}`;
+  if (part2) formatted += ` ${part2}`;
+  if (part3) formatted += `-${part3}`;
+  if (part4) formatted += `-${part4}`;
 
   return formatted;
 }

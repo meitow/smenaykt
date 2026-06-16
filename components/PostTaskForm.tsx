@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { DateField } from "@/components/DateField";
+import { TimeField } from "@/components/TimeField";
 import { EmojiPicker } from "@/components/EmojiPicker";
 import { PhoneField } from "@/components/PhoneField";
 import { StickyActionBar } from "@/components/StickyActionBar";
@@ -200,24 +201,20 @@ export function PostTaskForm() {
               <div className="grid grid-cols-2 gap-3">
                 <label className="block">
                   <span className="field-label">{t("post.timeStartLabel")}</span>
-                  <input
+                  <TimeField
                     name="timeStart"
-                    type="time"
                     required
                     value={timeStart}
-                    onChange={(e) => setTimeStart(e.target.value)}
-                    className="input-field"
+                    onChange={setTimeStart}
                   />
                 </label>
                 <label className="block">
                   <span className="field-label">{t("post.timeEndLabel")}</span>
-                  <input
+                  <TimeField
                     name="timeEnd"
-                    type="time"
                     required
                     value={timeEnd}
-                    onChange={(e) => setTimeEnd(e.target.value)}
-                    className="input-field"
+                    onChange={setTimeEnd}
                   />
                 </label>
               </div>

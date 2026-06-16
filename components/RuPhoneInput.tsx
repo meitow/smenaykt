@@ -3,12 +3,12 @@
 import { useEffect, useState } from "react";
 import {
   extractRuPhoneDigits,
-  formatRuPhone,
   formatRuPhoneInput,
   isValidRuPhone,
   phoneFromLocalDigits,
   ruPhoneLocalPart,
 } from "@/lib/phone";
+import { t } from "@/lib/i18n";
 
 type RuPhoneInputProps = {
   value: string;
@@ -68,13 +68,11 @@ export function RuPhoneInput({
             input.setSelectionRange(input.value.length, input.value.length);
           });
         }}
-        placeholder="+7 999 123 45 67"
+        placeholder="+7 924 163-96-55"
         className="input-field tracking-wide"
         aria-invalid={showError}
       />
-      <p className="mt-1 text-[13px] text-muted">
-        {valid ? formatRuPhone(full) : hint}
-      </p>
+      <p className="mt-1 text-[13px] text-muted">{valid ? t("post.phoneConfirmed") : hint}</p>
       {showError && invalidHint ? (
         <p className="mt-1 text-[13px] text-rose-600">{invalidHint}</p>
       ) : null}
